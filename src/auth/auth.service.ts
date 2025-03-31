@@ -1,47 +1,124 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { Role } from '@prisma/client';
-import * as jwt from 'jsonwebtoken';
-import { ConfigService } from '@nestjs/config';
+import { LoginDto } from './dtos/login.dto';
+import { RegisterDto } from './dtos/register.dto';
+import messages from '../configs/messages';
+import { User } from '@prisma/client';
+
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService, private configService: ConfigService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-  async register(fullName: string, email: string, password: string, role: string) {
-    const hashedPassword = await bcrypt.hash(password, 10);
+  private async hashToken(token: string) {
+    return await bcrypt.hash(token, 10);
+  }
 
-    return this.prisma.user.create({
+  async validateUser(email: string, password: string): Promise<User> {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new UnauthorizedException(messages.INVALID_CREDENTIALS);
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) throw new UnauthorizedException(messages.INVALID_CREDENTIALS);
+
+    return user;
+  }
+
+  async login(dto: LoginDto) {
+    const user = await this.validateUser(dto.email, dto.password);
+    const payload = { sub: user.id, email: user.email, role: user.role };
+
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+
+    const hashed = await this.hashToken(refreshToken);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken: hashed },
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        plan: user.plan,
+      },
+    };
+  }
+
+  async register(dto: RegisterDto) {
+    const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    if (existing) throw new ConflictException(messages.ALREADY_EXIST("Email"));
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const newUser = await this.prisma.user.create({
       data: {
-        fullName,
-        email,
+        fullName: dto.fullName,
+        email: dto.email,
         password: hashedPassword,
-        role: role as Role,
+        role: dto.role,
+        plan: dto.plan,
       },
     });
+
+    const payload = { sub: newUser.id, email: newUser.email, role: newUser.role };
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+
+    const hashed = await this.hashToken(refreshToken);
+    await this.prisma.user.update({
+      where: { id: newUser.id },
+      data: { refreshToken: hashed },
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: newUser.id,
+        fullName: newUser.fullName,
+        email: newUser.email,
+        role: newUser.role,
+        plan: newUser.plan,
+      },
+    };
   }
 
-  async login(email: string, password: string) {
-    // Ищем пользователя в базе
-    const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) throw new UnauthorizedException('Неверный email или пароль');
+  async refreshTokens(userId: string, token: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.refreshToken) throw new UnauthorizedException();
 
-    // Проверяем пароль
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) throw new UnauthorizedException('Неверный email или пароль');
+    const isMatch = await bcrypt.compare(token, user.refreshToken);
+    if (!isMatch) throw new UnauthorizedException();
 
-    // Генерируем JWT-токен
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      this.configService.get<string>('JWT_SECRET') || 'default_secret',
-      { expiresIn: '7d' }
-    );
+    const payload = { sub: user.id, email: user.email, role: user.role };
+    const newAccess = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const newRefresh = this.jwtService.sign(payload, { expiresIn: '7d' });
 
-    return { token, user, role: user.role };
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken: await this.hashToken(newRefresh) },
+    });
+
+    return { accessToken: newAccess, refreshToken: newRefresh };
   }
 
-  async getUsers() {
-    return this.prisma.user.findMany();
+  async logout(userId: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: null },
+    });
   }
-  
 }

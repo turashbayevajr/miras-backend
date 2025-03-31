@@ -1,22 +1,52 @@
-import { Body, Controller, Post, Get } from '@nestjs/common';
+import { Controller, Post, Body, Request, UseGuards, Get } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+import { LoginDto } from './dtos/login.dto';
+import { RegisterDto } from './dtos/register.dto';
+import { JwtAuthGuard } from './jwt.guard';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
+
+  // ✅ Public
+  @Post('login')
+  @ApiOperation({ summary: 'Login with email and password' })
+  async login(@Body() dto: LoginDto) {
+    return this.authService.login(dto);
+  }
 
   @Post('register')
-  async register(@Body() dto: { fullName: string; email: string; password: string; role: string }) {
-    return this.authService.register(dto.fullName, dto.email, dto.password, dto.role);
+  @ApiOperation({ summary: 'Register new user' })
+  async register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
   }
 
-  @Post('login')
-  async login(@Body() body: { email: string; password: string }) {
-    return this.authService.login(body.email, body.password);
+  @Post('refresh')
+  @ApiOperation({ summary: 'Refresh tokens' })
+  async refresh(@Body() dto: { userId: string; refreshToken: string }) {
+    return this.authService.refreshTokens(dto.userId, dto.refreshToken);
   }
 
-  @Get('users')
-  getUsers() {
-    return this.authService.getUsers();
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  logout(@Request() req) {
+    return this.authService.logout(req.user.sub);
+  }
+
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  getProfile(@Request() req) {
+    return req.user;
+  }
+
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  getMe(@Request() req) {
+    return req.user;
   }
 }
