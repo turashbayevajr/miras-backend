@@ -19,7 +19,15 @@ export class CourseRepository {
   }
 
   async findById(id: string): Promise<Course | null> {
-    return this.prisma.course.findUnique({ where: { id,  deletedAt:null } }) as unknown as Course;
+    return this.prisma.course.findUnique({
+      where: { 
+        id,  
+        deletedAt:null 
+      }, 
+      include: {
+        lessons: true,
+    },
+   }) as unknown as Course;
   }
 
   async update(id: string, data: UpdateCourseDto): Promise<Course> {

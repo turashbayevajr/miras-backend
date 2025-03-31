@@ -3,6 +3,7 @@ import { PrismaService } from "../../prisma/prisma.service";
 import { CreateLessonDto } from "../api/dtos/create-lesson.dto";
 import { UpdateLessonDto } from "../api/dtos/update-lesson.dto";
 import { Lesson } from "./lesson.model";
+import { Submission } from "src/submission/repository/submission.model";
 
 @Injectable()
 export class LessonRepository {
@@ -17,9 +18,22 @@ export class LessonRepository {
   }
 
   async findById(id: string): Promise<Lesson | null> {
-    return this.prisma.lesson.findUnique({ where: { id } }) as unknown as Lesson;
-  }
-
+    return this.prisma.lesson.findUnique({
+      where: { id },
+      include: {
+        homework: {
+          include: {
+            submissions: true,
+          },
+        },
+        test: {
+          include: {
+            submissions: true,
+          },
+        },
+      },
+    }) as unknown as Lesson;
+  }  
   async update(id: string, data: UpdateLessonDto): Promise<Lesson> {
     return this.prisma.lesson.update({ where: { id }, data }) as unknown as Lesson;
   }
