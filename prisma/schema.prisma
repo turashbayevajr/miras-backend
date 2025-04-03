@@ -86,11 +86,27 @@ model Homework {
 model Test {
   id          String       @id @default(uuid())
   title       String
-  questions   Json
   lesson      Lesson       @relation(fields: [lessonId], references: [id])
   lessonId    String       @unique
   submissions Submission[]
-  deletedAt    DateTime?
+  deletedAt   DateTime?
+  questions   Question[]
+}
+
+model Question {
+  id          String       @id @default(uuid())
+  text        String
+  test        Test         @relation(fields: [testId], references: [id])
+  testId      String 
+  variants    Variant[]
+}
+
+model Variant {
+  id          String       @id @default(uuid())
+  text        String
+  isCorrect   Boolean
+  question    Question     @relation(fields: [questionId], references: [id])
+  questionId  String
 }
 
 model Submission {

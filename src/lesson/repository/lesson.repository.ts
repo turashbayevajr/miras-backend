@@ -3,7 +3,6 @@ import { PrismaService } from "../../prisma/prisma.service";
 import { CreateLessonDto } from "../api/dtos/create-lesson.dto";
 import { UpdateLessonDto } from "../api/dtos/update-lesson.dto";
 import { Lesson } from "./lesson.model";
-import { Submission } from "src/submission/repository/submission.model";
 
 @Injectable()
 export class LessonRepository {
@@ -14,7 +13,11 @@ export class LessonRepository {
   }
 
   async findAll(): Promise<Lesson[]> {
-    return this.prisma.lesson.findMany() as unknown as Lesson[];
+    return this.prisma.lesson.findMany({
+      orderBy: {
+        createdAt: 'asc',
+      },
+    }) as unknown as Lesson[];
   }
 
   async findById(id: string): Promise<Lesson | null> {
@@ -29,6 +32,11 @@ export class LessonRepository {
         test: {
           include: {
             submissions: true,
+            questions: {
+              include: {
+                variants: true,
+              },
+            },
           },
         },
       },

@@ -15,6 +15,9 @@ export class CourseRepository {
   async findAll(): Promise<Course[]> {
     return this.prisma.course.findMany({
       where: { deletedAt:null },
+      orderBy: {
+        createdAt: 'asc',
+      },
     }) as unknown as Course[];
   }
 
