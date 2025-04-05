@@ -36,7 +36,6 @@ export class AuthController {
     return this.authService.logout(req.user.sub);
   }
 
-  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {

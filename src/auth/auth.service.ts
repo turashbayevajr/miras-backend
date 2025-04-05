@@ -73,7 +73,7 @@ export class AuthService {
       },
     });
 
-    const payload = { sub: newUser.id, email: newUser.email, role: newUser.role };
+    const payload = { sub: newUser.id, fullName: newUser.fullName,email: newUser.email, role: newUser.role };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
@@ -103,7 +103,7 @@ export class AuthService {
     const isMatch = await bcrypt.compare(token, user.refreshToken);
     if (!isMatch) throw new UnauthorizedException();
 
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const payload = { sub: user.id, fullName: user.fullName ,email: user.email, role: user.role };
     const newAccess = this.jwtService.sign(payload, { expiresIn: '15m' });
     const newRefresh = this.jwtService.sign(payload, { expiresIn: '7d' });
 

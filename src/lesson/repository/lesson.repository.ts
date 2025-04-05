@@ -26,12 +26,20 @@ export class LessonRepository {
       include: {
         homework: {
           include: {
-            submissions: true,
+            submissions: {
+              include: {
+                user: true,
+              },
+            },
           },
         },
         test: {
           include: {
-            submissions: true,
+            submissions: {
+              include: {
+                user: true,
+              },
+            },
             questions: {
               include: {
                 variants: true,

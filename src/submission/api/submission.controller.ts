@@ -8,6 +8,7 @@ import {
     Body,
     UsePipes,
     ValidationPipe,
+    Query,
   } from "@nestjs/common";
   import { SubmissionService } from "../service/submission.service";
   import { CreateSubmissionDto } from "./dtos/create-submission.dto";
@@ -32,6 +33,15 @@ import {
     @ApiResponse({ status: 200, description: "Submissions listed" })
     async findAll() {
       return this.service.getAllSubmissions();
+    }
+    @Get('check')
+    @ApiOperation({ summary: 'Check if user has submitted for this lesson' })
+    @ApiResponse({ status: 200, description: 'Submission found or null' })
+    async checkSubmission(
+    @Query('lessonId') lessonId: string,
+    @Query('userId') userId: string,
+    ) {
+    return this.service.checkUserSubmission(lessonId, userId);
     }
   
     @Get(":id")
