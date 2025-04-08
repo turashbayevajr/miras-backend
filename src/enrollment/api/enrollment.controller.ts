@@ -8,6 +8,7 @@ import {
     Body,
     UsePipes,
     ValidationPipe,
+    Query
   } from "@nestjs/common";
   import { EnrollmentService } from "../service/enrollment.service";
   import { CreateEnrollmentDto } from "./dtos/create-enrollment.dto";
@@ -32,6 +33,15 @@ import {
     @ApiResponse({ status: 200, description: "List of enrollments" })
     async findAll() {
       return this.service.getAllEnrollments();
+    }
+  
+    @Get("check")
+    @ApiOperation({ summary: 'Check if user has already enrolled for this course' })
+    @ApiResponse({ status: 200, description: 'Enrollment found or null' })
+    async getByUser(
+    @Query('userId') userId: string,
+    ) {
+    return this.service.findByUser(userId);
     }
   
     @Get(":id")

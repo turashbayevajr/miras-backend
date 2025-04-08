@@ -32,5 +32,9 @@ export default {
   UNIQUE_CONSTRAINT_FAILED: (entity: string, field: string, value: string) => `The value '${value}' for '${field}' in ${entity} already exists.`,
   PRISMA_ENTITY_NOT_FOUND: (entity: string) => `Entity '${entity}' not found in PrismaClient. Ensure the model name is correct in the validator.`,
   FUTURE_DATE: "Date and time must be in the future.",
-
+  NOT_FOUND_BY_FIELD : (entity: string, field: string, value: string) =>
+    `${entity} not found with ${field}: ${value}`,
+  DATABASE_FETCH_ERROR_BY_FIELD: (entity: string, field: string, value: string) =>
+    `Failed to fetch ${entity} by ${field}: ${value}`,
+  
 };

@@ -30,8 +30,7 @@ import { TestService } from "../../test/service/test.service";
         let score_test: number | undefined = undefined;
     
         if (dto.testId && dto.testAnswers) {
-          const test = await this.testService.getTestById(dto.testId);
-    
+        const test = await this.testService.getTestById(dto.testId);    
           if (!test) {
             throw new NotFoundException(`Test not found with id: ${dto.testId}`);
           }

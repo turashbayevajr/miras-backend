@@ -43,6 +43,7 @@ export class SubmissionRepository {
       select: {
         id: true,
         content: true,
+        testAnswers:true,
         score: true,
         score_test: true,
         score_homework: true,

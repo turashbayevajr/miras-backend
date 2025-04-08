@@ -16,6 +16,20 @@ export class EnrollmentRepository {
     return this.prisma.enrollment.findMany() as unknown as Enrollment[];
   }
 
+  async findByUser(userId: string) {
+    return this.prisma.enrollment.findMany({
+      where: {
+        userId,
+      },
+      select: {
+        id: true,
+        courseId: true,
+        userId: true,
+        enrolledAt: true
+      },
+    });
+  }
+
   async findById(id: string): Promise<Enrollment | null> {
     return this.prisma.enrollment.findUnique({ where: { id } }) as unknown as Enrollment;
   }

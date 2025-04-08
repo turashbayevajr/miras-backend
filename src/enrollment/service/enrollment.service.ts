@@ -52,7 +52,24 @@ import {
         throw new InternalServerErrorException(messages.DATABASE_FETCH_ERROR_BY_ID(this.entityName, id));
       }
     }
-  
+    async findByUser(userId: string): Promise<Enrollment[]> {
+      try {
+        const items = await this.enrollmentRepository.findByUser(userId);
+        if (!items || items.length === 0) {
+          throw new NotFoundException(messages.NOT_FOUND_BY_FIELD(this.entityName, 'userId', userId));
+        }
+        return items;
+      } catch (error) {
+        if (error instanceof NotFoundException) throw error;
+        this.logger.error(
+          messages.DATABASE_FETCH_ERROR_BY_FIELD(this.entityName, 'userId', userId),
+          error.stack,
+        );
+        throw new InternalServerErrorException(
+          messages.DATABASE_FETCH_ERROR_BY_FIELD(this.entityName, 'userId', userId),
+        );
+      }
+    }    
     async updateEnrollment(id: string, dto: UpdateEnrollmentDto): Promise<Enrollment> {
       try {
         await this.getEnrollmentById(id);
@@ -63,7 +80,7 @@ import {
         throw new InternalServerErrorException(messages.DATABASE_UPDATE_ERROR(this.entityName, id));
       }
     }
-  
+
     async deleteEnrollment(id: string): Promise<Enrollment> {
       try {
         await this.getEnrollmentById(id);
