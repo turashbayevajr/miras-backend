@@ -54,10 +54,11 @@ import { TestService } from "../../test/service/test.service";
     
           score_test = Number(((correct / total) * 100).toFixed(2));
         }
-    
+        const score =  (score_test ?? 0) /2;
         const saved = await this.repo.create({
           ...dto,
           score_test,
+          score: score
         });
     
         return saved;
@@ -99,14 +100,21 @@ import { TestService } from "../../test/service/test.service";
   
     async updateSubmission(id: string, dto: UpdateSubmissionDto): Promise<Submission> {
       try {
-        await this.getSubmissionById(id);
-        return this.repo.update(id, dto);
+        const submission = await this.getSubmissionById(id);
+        const scoreTest = dto.score_test ?? submission.score_test ?? 0;
+        const scoreHomework = dto.score_homework ?? 0;
+        const score = Number(((scoreTest + scoreHomework) / 2).toFixed(2));
+    
+        return this.repo.update(id, {
+          ...dto,
+          score,
+        });
       } catch (error) {
         if (error instanceof NotFoundException) throw error;
         this.logger.error(messages.DATABASE_UPDATE_ERROR(this.entityName, id), error.stack);
         throw new InternalServerErrorException(messages.DATABASE_UPDATE_ERROR(this.entityName, id));
       }
-    }
+    }    
   
     async deleteSubmission(id: string): Promise<Submission> {
       try {
