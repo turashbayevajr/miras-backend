@@ -20,7 +20,7 @@ async function bootstrap() {
       name: 'Authorization',
       in: 'header',
     },
-    'access-token', // This name will be used in decorators
+    'access-token',
   )
   .build();
   
@@ -28,7 +28,11 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   app.useStaticAssets(join(process.cwd(), "uploads"), { prefix: "/uploads" });
-  app.enableCors();
+  app.enableCors({
+    origin: "*", // frontend origin
+    credentials: true, // 💡 allow cookies
+  });
+  
   await app.listen(process.env.PORT ?? 4000);
 }
 bootstrap();

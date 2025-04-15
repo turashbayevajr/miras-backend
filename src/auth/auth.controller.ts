@@ -1,5 +1,6 @@
-import { Controller, Post, Body, Request, UseGuards, Get } from '@nestjs/common';
+import { Controller, Post, Body, Request, UseGuards, Get, Res } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dtos/login.dto';
 import { RegisterDto } from './dtos/register.dto';
@@ -10,12 +11,33 @@ import { JwtAuthGuard } from './jwt.guard';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // ✅ Public
   @Post('login')
-  @ApiOperation({ summary: 'Login with email and password' })
-  async login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const { accessToken, refreshToken, user } = await this.authService.login(dto);
+  
+    // 🍪 Set cookies
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      path: '/',
+      sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'strict',
+      secure: process.env.NODE_ENV === 'production' ? true : false,
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+  
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      path: '/',
+      sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'strict',
+      secure: process.env.NODE_ENV === 'production' ? true : false,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+  
+    return { user, accessToken, refreshToken };
   }
+  
 
   @Post('register')
   @ApiOperation({ summary: 'Register new user' })
@@ -30,10 +52,16 @@ export class AuthController {
   }
 
   @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Logout and clear tokens' })
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  logout(@Request() req) {
-    return this.authService.logout(req.user.sub);
+  async logout(@Request() req, @Res({ passthrough: true }) res: Response) {
+    await this.authService.logout(req.user.sub);
+
+    res.clearCookie('accessToken', { path: '/' });
+    res.clearCookie('refreshToken', { path: '/' });
+
+    return { message: 'Logged out successfully' };
   }
 
   @UseGuards(JwtAuthGuard)
