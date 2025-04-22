@@ -69,11 +69,11 @@ export class AuthService {
         email: dto.email,
         password: hashedPassword,
         role: dto.role,
-        plan: dto.plan,
+        plan: "STANDARD",
       },
     });
 
-    const payload = { sub: newUser.id, fullName: newUser.fullName,email: newUser.email, role: newUser.role };
+    const payload = { sub: newUser.id, fullName: newUser.fullName,email: newUser.email, role: newUser.role, plan: newUser.plan};
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
