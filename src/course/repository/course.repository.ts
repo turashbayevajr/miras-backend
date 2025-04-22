@@ -3,6 +3,7 @@ import { PrismaService } from "../../prisma/prisma.service";
 import { CreateCourseDto } from "../api/dtos/create-course.dto";
 import { UpdateCourseDto } from "../api/dtos/update-course.dto";
 import { Course } from "./course.model";
+import { Plan } from "@prisma/client";
 
 @Injectable()
 export class CourseRepository {
@@ -20,7 +21,33 @@ export class CourseRepository {
       },
     }) as unknown as Course[];
   }
-
+  async findByPlan(plan?: Plan): Promise<Course[]> {
+    return this.prisma.course.findMany({
+      where: {
+        deletedAt: null,
+        ...(plan ? { plan } : {}),
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    }) as unknown as Course[];
+  }
+  async findCoursesByUserEnrollment(userId: string): Promise<Course[]> {
+    return this.prisma.course.findMany({
+      where: {
+        deletedAt: null,
+        enrollments: {
+          some: {
+            userId,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    }) as unknown as Course[];
+  }
+  
   async findById(id: string): Promise<Course | null> {
     return this.prisma.course.findUnique({
       where: { 

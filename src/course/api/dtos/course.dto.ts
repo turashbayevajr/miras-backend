@@ -1,10 +1,10 @@
-import { IsString, IsNotEmpty, IsUUID, IsEnum } from "class-validator";
+import { IsString, IsNotEmpty, IsUUID, IsEnum, IsOptional } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import messages from "../../../configs/messages";
 import { Exists } from "../../../validators/exists.validator";
 import { Plan } from "@prisma/client";
 
-export class CreateCourseDto {
+export class CourseDto {
   @ApiProperty({ example: "NestJS for Beginners" })
   @IsNotEmpty({ message: messages.REQUIRED_FIELD("Title") })
   @IsString({ message: messages.MUST_BE_STRING("Title") })
@@ -18,7 +18,8 @@ export class CreateCourseDto {
   @ApiProperty({ example: "b5a8d9f2-1234-5678-9101-abcdef123456", description: "User ID" })
   @IsUUID("4", { message: messages.INVALID_ID("User ID") })
   @Exists("user", { message: args => messages.INVALID_RELATION("User", args.value) })
-  creatorId: string;
+  @IsOptional()
+  creatorId?: string;
   
   @ApiProperty({ example: "PREMIUM", enum: Plan })
   @IsEnum(Plan, { message: messages.INVALID_ENUM("Plan") })

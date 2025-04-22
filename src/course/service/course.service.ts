@@ -9,6 +9,7 @@ import {
   import { UpdateCourseDto } from "../api/dtos/update-course.dto";
   import { Course } from "../repository/course.model";
   import messages from "../../configs/messages";
+import { Plan } from "@prisma/client";
   
   @Injectable()
   export class CourseService {
@@ -32,6 +33,22 @@ import {
       } catch (error) {
         this.logger.error(messages.DATABASE_FETCH_ERROR(this.entityName), error.stack);
         throw new InternalServerErrorException(messages.DATABASE_FETCH_ERROR(this.entityName));
+      }
+    }
+    async getCoursesByPlan(plan: Plan): Promise<Course[]> {
+      try {
+        return this.courseRepository.findByPlan(plan);
+      } catch (error) {
+        this.logger.error(messages.DATABASE_FETCH_ERROR(this.entityName), error.stack);
+        throw new InternalServerErrorException(messages.DATABASE_FETCH_ERROR(this.entityName));
+      }
+    }
+    async getMyCourses(userId: string): Promise<Course[]> {
+      try {
+        return await this.courseRepository.findCoursesByUserEnrollment(userId);
+      } catch (error) {
+        this.logger.error(`Failed to fetch enrolled courses for user ${userId}`, error.stack);
+        throw new InternalServerErrorException("Failed to fetch enrolled courses");
       }
     }
   

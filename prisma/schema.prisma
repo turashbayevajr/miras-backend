@@ -41,6 +41,7 @@ model Course {
   id          String       @id @default(uuid())
   title       String
   description String
+  plan        Plan         @default(STANDARD) 
   createdAt   DateTime     @default(now())
   creator     User         @relation("CourseCreator", fields: [creatorId], references: [id])
   creatorId   String

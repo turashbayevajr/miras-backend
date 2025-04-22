@@ -1,27 +1,53 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Controller, Get, Post, Put, Delete, Param, Body, UsePipes, ValidationPipe, Req, UnauthorizedException } from "@nestjs/common";
 import { CourseService } from "../service/course.service";
 import { CreateCourseDto } from "./dtos/create-course.dto";
 import { UpdateCourseDto } from "./dtos/update-course.dto";
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from "@nestjs/swagger";
+import { CourseDto } from "./dtos/course.dto";
+import { JwtService } from "@nestjs/jwt";
 
 @ApiTags("Courses")
 @Controller("course")
 export class CourseController {
-  constructor(private readonly service: CourseService) {}
+  constructor(
+    private readonly service: CourseService,
+    private readonly jwtService: JwtService) {}
 
   @Post()
-  @ApiOperation({ summary: "Create new course" })
+  @ApiOperation({ summary: "Create a course" })
   @ApiResponse({ status: 201, description: "Course created" })
-  @UsePipes(new ValidationPipe({ whitelist: true }))
-  async create(@Body() dto: CreateCourseDto) {
-    return this.service.createCourse(dto);
+  async createCourse(@Body() dto: CreateCourseDto, @Req() request: Request) {
+    const authHeader = request.headers['authorization'];
+    const token = authHeader?.split(' ')[1]; // Bearer <token>
+  
+    if (!token) throw new UnauthorizedException('Missing token');
+  
+    let payload: any;
+    try {
+      payload = this.jwtService.verify(token, {
+        secret: process.env.JWT_SECRET,
+      });
+    } catch {
+      throw new UnauthorizedException('Invalid token');
+    }
+  
+    const userId = payload.sub;
+    return this.service.createCourse({ ...dto, creatorId: userId });
   }
+
 
   @Get()
   @ApiOperation({ summary: "List all courses" })
   @ApiResponse({ status: 200, description: "Courses listed" })
   async findAll() {
     return this.service.getAllCourses();
+  }
+  @Get("my-course")
+  @ApiOperation({ summary: "List all courses the user is enrolled in" })
+  @ApiResponse({ status: 200, description: "Courses listed" })
+  async findMyCourses(@Req() request: Request) {
+    const userId = request["session"]?.userId;
+    return this.service.getMyCourses(userId);
   }
 
   @Get(":id")
