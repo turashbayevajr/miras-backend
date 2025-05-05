@@ -10,7 +10,11 @@ export class AdminService {
 
   async getUsers() {
     try {
-      return await this.prisma.user.findMany();
+      return await this.prisma.user.findMany({
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
     } catch (error) {
       throw new InternalServerErrorException('Failed to fetch users');
     }
