@@ -12,10 +12,9 @@ import { HomeworkModule } from './homework/homework.module';
 import { TestModule } from './test/test.module';
 import { SubmissionModule } from './submission/submission.module';
 import { AnalyticsModule } from './analytics/analytics.module';
-import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), AuthModule, PrismaModule, CourseModule, AdminModule, EnrollmentModule, LessonModule, HomeworkModule, TestModule, SubmissionModule, AnalyticsModule, UserModule,],
+  imports: [ConfigModule.forRoot(), AuthModule, PrismaModule, CourseModule, AdminModule, EnrollmentModule, LessonModule, HomeworkModule, TestModule, SubmissionModule, AnalyticsModule,],
   controllers: [AppController],
   providers: [AppService],
 })
