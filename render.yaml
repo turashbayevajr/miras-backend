@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: backend
+    env: docker
+    plan: free
+    dockerfilePath: dev.Dockerfile
+    dockerContext: .
+    envVars:
+      - key: JWT_SECRET
+        value: my_secret_key
+      - key: POSTGRES_USER
+        value: postgres
+      - key: POSTGRES_PASSWORD
+        value: password
+      - key: POSTGRES_HOST
+        value: db
+      - key: POSTGRES_PORT
+        value: 5432
+      - key: POSTGRES_DB
+        value: backendhub
+      - key: DATABASE_URL
+        value: postgres://postgres:password@db:5432/backendhub
+    healthCheckPath: /
+    autoDeploy: true
+
+databases:
+  - name: main-db
+    plan: free
+    postgresMajorVersion: 16
