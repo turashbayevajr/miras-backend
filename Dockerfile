@@ -20,4 +20,4 @@ RUN npx prisma generate
 
 ENV TZ=Asia/Aqtau
 
-CMD ["npm", "run", "start:dev", "npx", "prisma", "db", "seed"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma db seed && npm run start:dev"]
