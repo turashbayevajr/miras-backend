@@ -103,7 +103,7 @@ export class AuthService {
     const isMatch = await bcrypt.compare(token, user.refreshToken);
     if (!isMatch) throw new UnauthorizedException();
 
-    const payload = { sub: user.id, fullName: user.fullName ,email: user.email, role: user.role };
+    const payload = { sub: user.id, fullName: user.fullName ,email: user.email, plan: user.plan,role: user.role };
     const newAccess = this.jwtService.sign(payload, { expiresIn: '15m' });
     const newRefresh = this.jwtService.sign(payload, { expiresIn: '7d' });
 

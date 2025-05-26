@@ -42,12 +42,11 @@ export class CourseController {
   async findAll() {
     return this.service.getAllCourses();
   }
-  @Get("my-course")
+  @Get("my-course/:id")
   @ApiOperation({ summary: "List all courses the user is enrolled in" })
   @ApiResponse({ status: 200, description: "Courses listed" })
-  async findMyCourses(@Req() request: Request) {
-    const userId = request["session"]?.userId;
-    return this.service.getMyCourses(userId);
+  async findMyCourses(@Param("id") id: string) {
+    return this.service.getMyCourses(id);
   }
 
   @Get(":id")
