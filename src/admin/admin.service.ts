@@ -19,6 +19,17 @@ export class AdminService {
       throw new InternalServerErrorException('Failed to fetch users');
     }
   }
+    async getUser(id: string) {
+    try {
+      return await this.prisma.user.findUnique({
+      where: {
+        id,
+      }
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch users');
+    }
+  }
 
   async createUser(data: { fullName: string; email: string; password: string; role: Role }) {
     try {

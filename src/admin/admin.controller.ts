@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Put } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { Role, Plan } from '@prisma/client';
 
@@ -9,6 +9,11 @@ export class AdminController {
   @Get('users')
   getUsers() {
     return this.adminService.getUsers();
+  }
+
+  @Get('user/:id')
+  getUser( @Param('id') id: string ) {
+    return this.adminService.getUser(id);
   }
 
   @Post('users')
