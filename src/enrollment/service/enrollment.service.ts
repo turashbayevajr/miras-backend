@@ -17,22 +17,39 @@ import {
   
     constructor(private readonly enrollmentRepository: EnrollmentRepository) {}
   
-    async createEnrollment(dto: CreateEnrollmentDto): Promise<Enrollment> {
-      try {
-        const existing = await this.enrollmentRepository.findByUserAndCourse(dto.userId, dto.courseId);
-        if (existing) {
-          throw new InternalServerErrorException(messages.ALREADY_EXIST(this.entityName));
-        }
-        return await this.enrollmentRepository.create(dto);
-      } catch (error) {
-        this.logger.error(messages.DATABASE_CREATE_ERROR(this.entityName), error.stack);
-        throw new InternalServerErrorException(messages.DATABASE_CREATE_ERROR(this.entityName));
+async createEnrollment(dto: CreateEnrollmentDto): Promise<Enrollment> {
+  try {
+    const existing = await this.enrollmentRepository.findByUserAndCourse(dto.userId, dto.courseId);
+
+    if (existing) {
+      if (existing.deletedAt) {
+        // ✅ Restore soft-deleted enrollment
+        return await this.enrollmentRepository.restore(existing.id);
       }
+
+      // ❌ Already exists and active
+      throw new InternalServerErrorException(messages.ALREADY_EXIST(this.entityName));
     }
+
+    return await this.enrollmentRepository.create(dto);
+
+  } catch (error) {
+    this.logger.error(messages.DATABASE_CREATE_ERROR(this.entityName), error.stack);
+    throw new InternalServerErrorException(messages.DATABASE_CREATE_ERROR(this.entityName));
+  }
+}
   
     async getAllEnrollments(): Promise<Enrollment[]> {
       try {
         return this.enrollmentRepository.findAll();
+      } catch (error) {
+        this.logger.error(messages.DATABASE_FETCH_ERROR(this.entityName), error.stack);
+        throw new InternalServerErrorException(messages.DATABASE_FETCH_ERROR(this.entityName));
+      }
+    }
+    async getPendingEnrollments(){
+      try {
+        return this.enrollmentRepository.findAllPending();
       } catch (error) {
         this.logger.error(messages.DATABASE_FETCH_ERROR(this.entityName), error.stack);
         throw new InternalServerErrorException(messages.DATABASE_FETCH_ERROR(this.entityName));

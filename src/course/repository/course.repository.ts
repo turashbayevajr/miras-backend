@@ -32,21 +32,41 @@ export class CourseRepository {
       },
     }) as unknown as Course[];
   }
-  async findCoursesByUserEnrollment(userId: string): Promise<Course[]> {
-    return this.prisma.course.findMany({
-      where: {
-        deletedAt: null,
-        enrollments: {
-          some: {
-            userId,
-          },
+async findCoursesByUserEnrollment(userId: string): Promise<Course[]> {
+  return this.prisma.course.findMany({
+    where: {
+      deletedAt: null,
+      enrollments: {
+        some: {
+          userId,
+          is_approved: true,
+          deletedAt:null
         },
       },
-      orderBy: {
-        createdAt: "asc",
+    },
+    orderBy: {
+      createdAt: 'asc',
+    },
+  }) as unknown as Course[];
+}
+async findPendingByUserEnrollment(userId: string): Promise<Course[]> {
+  return this.prisma.course.findMany({
+    where: {
+      deletedAt: null,
+      enrollments: {
+        some: {
+          userId,
+          is_approved: false,
+          deletedAt:null
+        },
       },
-    }) as unknown as Course[];
-  }
+    },
+    orderBy: {
+      createdAt: 'asc',
+    },
+  }) as unknown as Course[];
+}
+
   
   async findById(id: string): Promise<Course | null> {
     return this.prisma.course.findUnique({

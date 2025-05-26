@@ -51,6 +51,14 @@ import { Plan } from "@prisma/client";
         throw new InternalServerErrorException("Failed to fetch enrolled courses");
       }
     }
+    async getMyPendingCourses(userId: string): Promise<Course[]> {
+      try {
+        return await this.courseRepository.findPendingByUserEnrollment(userId);
+      } catch (error) {
+        this.logger.error(`Failed to fetch enrolled courses for user ${userId}`, error.stack);
+        throw new InternalServerErrorException("Failed to fetch enrolled courses");
+      }
+    }
   
     async getCourseById(id: string): Promise<Course> {
       try {

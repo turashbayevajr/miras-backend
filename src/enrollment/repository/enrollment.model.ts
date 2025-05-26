@@ -3,6 +3,7 @@ export class Enrollment {
     userId: string;
     courseId: string;
     enrolledAt: Date;
+    is_approved?: boolean;
     deletedAt?: Date;
   }
   

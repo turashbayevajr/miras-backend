@@ -48,6 +48,12 @@ export class CourseController {
   async findMyCourses(@Param("id") id: string) {
     return this.service.getMyCourses(id);
   }
+  @Get("my-pending/:id")
+  @ApiOperation({ summary: "List all courses the user is enrolled in" })
+  @ApiResponse({ status: 200, description: "Courses listed" })
+  async findMyPending(@Param("id") id: string) {
+    return this.service.getMyPendingCourses(id);
+  }
 
   @Get(":id")
   @ApiOperation({ summary: "Get course by ID" })

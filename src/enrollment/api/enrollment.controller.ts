@@ -44,6 +44,13 @@ import {
     return this.service.findByUser(userId);
     }
   
+    @Get('pending')
+    @ApiOperation({ summary: "List all pending enrollments" })
+    @ApiResponse({ status: 200, description: "List of pending enrollments" })
+    async getPending() {
+    return this.service.getPendingEnrollments();
+  }
+  
     @Get(":id")
     @ApiOperation({ summary: "Get enrollment by ID" })
     @ApiParam({ name: "id", description: "Enrollment ID", type: String })

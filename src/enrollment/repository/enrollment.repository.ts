@@ -13,19 +13,41 @@ export class EnrollmentRepository {
   }
 
   async findAll(): Promise<Enrollment[]> {
-    return this.prisma.enrollment.findMany() as unknown as Enrollment[];
+    return this.prisma.enrollment.findMany({
+      where: {
+        deletedAt:null
+      },
+      include: {
+        user: true,
+        course: true,
+      },
+      orderBy: {
+        id: 'desc',
+      }
+    }) as unknown as Enrollment[];
   }
 
   async findByUser(userId: string) {
     return this.prisma.enrollment.findMany({
       where: {
         userId,
+        is_approved: true,
+        deletedAt: null
       },
       select: {
         id: true,
         courseId: true,
         userId: true,
         enrolledAt: true
+      },
+    });
+  }
+  async findAllPending(){
+    return this.prisma.enrollment.findMany({
+      where: { is_approved: false, deletedAt: null },
+      include: {
+        user: true,
+        course: true,
       },
     });
   }
@@ -56,4 +78,14 @@ async delete(id: string): Promise<Enrollment> {
   async findByUserAndCourse(userId: string, courseId: string): Promise<Enrollment | null> {
     return this.prisma.enrollment.findFirst({ where: { userId, courseId } }) as unknown as Enrollment;
   }
+  async restore(id: string): Promise<Enrollment> {
+  return this.prisma.enrollment.update({
+    where: { id },
+    data: {
+      deletedAt: null,
+      is_approved: false,
+    },
+  }) as unknown as Enrollment;
+}
+
 }
