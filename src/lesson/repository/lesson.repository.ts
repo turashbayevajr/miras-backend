@@ -1,8 +1,8 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../../prisma/prisma.service";
-import { CreateLessonDto } from "../api/dtos/create-lesson.dto";
-import { UpdateLessonDto } from "../api/dtos/update-lesson.dto";
-import { Lesson } from "./lesson.model";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateLessonDto } from '../api/dtos/create-lesson.dto';
+import { UpdateLessonDto } from '../api/dtos/update-lesson.dto';
+import { Lesson } from './lesson.model';
 
 @Injectable()
 export class LessonRepository {
@@ -49,9 +49,20 @@ export class LessonRepository {
         },
       },
     }) as unknown as Lesson;
-  }  
+  }
+    async findByCourseId(courseId: string): Promise<Lesson[]> {
+    return this.prisma.lesson.findMany({
+      where: { courseId: courseId },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    }) as unknown as Lesson[];
+  }
   async update(id: string, data: UpdateLessonDto): Promise<Lesson> {
-    return this.prisma.lesson.update({ where: { id }, data }) as unknown as Lesson;
+    return this.prisma.lesson.update({
+      where: { id },
+      data,
+    }) as unknown as Lesson;
   }
 
   async delete(id: string): Promise<Lesson> {
@@ -59,7 +70,7 @@ export class LessonRepository {
       where: { id },
       data: { deletedAt: new Date() },
     }) as unknown as Lesson;
-  }  
+  }
 
   async deleteMany(ids: string[]): Promise<number> {
     const res = await this.prisma.lesson.updateMany({

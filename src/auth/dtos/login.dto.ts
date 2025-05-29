@@ -8,6 +8,6 @@ export class LoginDto {
   email: string;
 
   @ApiProperty({ example: 'StrongPass123!' })
-  @IsString({ message: messages.MUST_BE_STRING("Password") })
+  @IsString({ message: messages.MUST_BE_STRING('Password') })
   password: string;
 }

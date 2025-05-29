@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -19,19 +23,24 @@ export class AdminService {
       throw new InternalServerErrorException('Failed to fetch users');
     }
   }
-    async getUser(id: string) {
+  async getUser(id: string) {
     try {
       return await this.prisma.user.findUnique({
-      where: {
-        id,
-      }
+        where: {
+          id,
+        },
       });
     } catch (error) {
       throw new InternalServerErrorException('Failed to fetch users');
     }
   }
 
-  async createUser(data: { fullName: string; email: string; password: string; role: Role }) {
+  async createUser(data: {
+    fullName: string;
+    email: string;
+    password: string;
+    role: Role;
+  }) {
     try {
       return await this.prisma.user.create({
         data: {
@@ -49,24 +58,32 @@ export class AdminService {
 
   async updateUser(
     id: string,
-    data: Partial<{ fullName: string; email: string; password: string; role: Role }>
+    data: Partial<{
+      fullName: string;
+      email: string;
+      password: string;
+      role: Role;
+    }>,
   ) {
     try {
       const existing = await this.prisma.user.findUnique({ where: { id } });
-      if (!existing) throw new NotFoundException(messages.NOT_FOUND_BY_ID("User", id));
-  
+      if (!existing)
+        throw new NotFoundException(messages.NOT_FOUND_BY_ID('User', id));
+
       const updateData = { ...data };
       if (data.password) {
         updateData.password = await bcrypt.hash(data.password, 10);
       }
-  
+
       return await this.prisma.user.update({
         where: { id },
         data: updateData,
       });
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(messages.DATABASE_UPDATE_ERROR("User", id));
+      throw new InternalServerErrorException(
+        messages.DATABASE_UPDATE_ERROR('User', id),
+      );
     }
   }
 

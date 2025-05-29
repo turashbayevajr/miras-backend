@@ -1,8 +1,14 @@
-import { registerDecorator, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from "class-validator";
-import { PrismaClient } from "@prisma/client";
-import { Injectable, Logger } from "@nestjs/common";
-import messages from "../configs/messages";
-import { validate as isUUID } from "uuid";
+import {
+  registerDecorator,
+  ValidationOptions,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+  ValidationArguments,
+} from 'class-validator';
+import { PrismaClient } from '@prisma/client';
+import { Injectable, Logger } from '@nestjs/common';
+import messages from '../configs/messages';
+import { validate as isUUID } from 'uuid';
 
 @ValidatorConstraint({ async: true })
 @Injectable()
@@ -37,7 +43,14 @@ export class ExistsValidator implements ValidatorConstraintInterface {
 
       return !!record;
     } catch (error) {
-      this.logger.error(messages.PRISMA_VALIDATION_ERROR(entityName, "id", value, error.message));
+      this.logger.error(
+        messages.PRISMA_VALIDATION_ERROR(
+          entityName,
+          'id',
+          value,
+          error.message,
+        ),
+      );
       return false;
     }
   }
@@ -48,7 +61,10 @@ export class ExistsValidator implements ValidatorConstraintInterface {
   }
 }
 
-export function Exists<T extends string>(entity: T, validationOptions?: ValidationOptions) {
+export function Exists<T extends string>(
+  entity: T,
+  validationOptions?: ValidationOptions,
+) {
   return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,

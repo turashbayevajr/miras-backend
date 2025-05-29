@@ -121,7 +121,7 @@ export class AnalyticsRepository {
         },
       },
     });
-  
+
     return courses
       .map((course) => {
         const total = course.lessons.reduce((sum, lesson) => {
@@ -129,7 +129,7 @@ export class AnalyticsRepository {
           const test = lesson.test?.submissions?.length ?? 0;
           return sum + hw + test;
         }, 0);
-  
+
         return {
           id: course.id,
           title: course.title,
@@ -139,7 +139,6 @@ export class AnalyticsRepository {
       .sort((a, b) => b.submissions - a.submissions)
       .slice(0, 5);
   }
-  
 
   async getOverallStats(from?: Date, to?: Date) {
     const [totalUsers, totalCourses, totalLessons, totalSubmissions] =

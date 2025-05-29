@@ -1,7 +1,13 @@
-import { registerDecorator, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from "class-validator";
-import { PrismaClient } from "@prisma/client";
-import { Injectable, Logger } from "@nestjs/common";
-import messages from "../configs/messages";
+import {
+  registerDecorator,
+  ValidationOptions,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+  ValidationArguments,
+} from 'class-validator';
+import { PrismaClient } from '@prisma/client';
+import { Injectable, Logger } from '@nestjs/common';
+import messages from '../configs/messages';
 
 @ValidatorConstraint({ async: true })
 @Injectable()
@@ -10,7 +16,11 @@ export class UniqueForUpdateValidator implements ValidatorConstraintInterface {
   private static readonly prisma = new PrismaClient();
 
   async validate(value: any, args: ValidationArguments): Promise<boolean> {
-    const [entityName, field, idField] = args.constraints as [string, string, string?];
+    const [entityName, field, idField] = args.constraints as [
+      string,
+      string,
+      string?,
+    ];
     const object = args.object as any;
 
     const id = idField ? object[idField] : object?.id;
@@ -29,14 +39,21 @@ export class UniqueForUpdateValidator implements ValidatorConstraintInterface {
       const whereCondition: Record<string, any> = { [field]: value };
 
       if (id) {
-        whereCondition["id"] = { not: id };
+        whereCondition['id'] = { not: id };
       }
 
       const existingRecord = await model.findFirst({ where: whereCondition });
 
       return !existingRecord;
     } catch (error) {
-      this.logger.error(messages.PRISMA_VALIDATION_ERROR(entityName, field, value, error.message));
+      this.logger.error(
+        messages.PRISMA_VALIDATION_ERROR(
+          entityName,
+          field,
+          value,
+          error.message,
+        ),
+      );
       return false;
     }
   }
@@ -47,7 +64,12 @@ export class UniqueForUpdateValidator implements ValidatorConstraintInterface {
   }
 }
 
-export function UniqueForUpdate<T extends string>(entity: T, field: string, idField: string, validationOptions?: ValidationOptions) {
+export function UniqueForUpdate<T extends string>(
+  entity: T,
+  field: string,
+  idField: string,
+  validationOptions?: ValidationOptions,
+) {
   return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,

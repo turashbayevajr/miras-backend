@@ -5,13 +5,7 @@ import { AnalyticsRepository } from '../repository/analytics.repository';
 export class AnalyticsService {
   constructor(private readonly repo: AnalyticsRepository) {}
 
-  async getAnalytics({
-    from,
-    to,
-  }: {
-    from?: Date;
-    to?: Date;
-  }) {
+  async getAnalytics({ from, to }: { from?: Date; to?: Date }) {
     const plans = ['STANDARD', 'PREMIUM', 'ENTERPRISE'] as const;
     const stats: Record<string, any> = {};
 
@@ -20,7 +14,10 @@ export class AnalyticsService {
     }
 
     const topByEnrollment = await this.repo.getTopCoursesByEnrollment(from, to);
-    const topBySubmissions = await this.repo.getTopCoursesBySubmissions(from, to);
+    const topBySubmissions = await this.repo.getTopCoursesBySubmissions(
+      from,
+      to,
+    );
 
     const overall = await this.repo.getOverallStats(from, to);
 

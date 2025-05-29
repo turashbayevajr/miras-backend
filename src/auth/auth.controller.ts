@@ -1,5 +1,18 @@
-import { Controller, Post, Body, Request, UseGuards, Get, Res } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Body,
+  Request,
+  UseGuards,
+  Get,
+  Res,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dtos/login.dto';
@@ -14,10 +27,11 @@ export class AuthController {
   @Post('login')
   async login(
     @Body() dto: LoginDto,
-    @Res({ passthrough: true }) res: Response
+    @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken, user } = await this.authService.login(dto);
-  
+    const { accessToken, refreshToken, user } =
+      await this.authService.login(dto);
+
     // 🍪 Set cookies
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
@@ -26,7 +40,7 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production' ? true : false,
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
-  
+
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       path: '/',
@@ -34,10 +48,9 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production' ? true : false,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
-  
+
     return { user, accessToken, refreshToken };
   }
-  
 
   @Post('register')
   @ApiOperation({ summary: 'Register new user' })

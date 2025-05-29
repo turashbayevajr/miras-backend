@@ -5,7 +5,13 @@ export class Test {
   questions?: Question[];
   deletedAt: Date | null;
 
-  constructor(id: string, title: string, lessonId: string, questions?: Question[], deletedAt?: Date) {
+  constructor(
+    id: string,
+    title: string,
+    lessonId: string,
+    questions?: Question[],
+    deletedAt?: Date,
+  ) {
     this.id = id;
     this.title = title;
     this.lessonId = lessonId;

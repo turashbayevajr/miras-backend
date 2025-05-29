@@ -1,7 +1,7 @@
-import { Module } from "@nestjs/common";
-import { ExistsValidator } from "./exists.validator";
-import { PrismaModule } from "../prisma/prisma.module";
-import { UniqueValidator } from "./unique.validator";
+import { Module } from '@nestjs/common';
+import { ExistsValidator } from './exists.validator';
+import { PrismaModule } from '../prisma/prisma.module';
+import { UniqueValidator } from './unique.validator';
 
 @Module({
   imports: [PrismaModule],

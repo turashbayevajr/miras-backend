@@ -14,7 +14,19 @@ import { SubmissionModule } from './submission/submission.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), AuthModule, PrismaModule, CourseModule, AdminModule, EnrollmentModule, LessonModule, HomeworkModule, TestModule, SubmissionModule, AnalyticsModule,],
+  imports: [
+    ConfigModule.forRoot(),
+    AuthModule,
+    PrismaModule,
+    CourseModule,
+    AdminModule,
+    EnrollmentModule,
+    LessonModule,
+    HomeworkModule,
+    TestModule,
+    SubmissionModule,
+    AnalyticsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

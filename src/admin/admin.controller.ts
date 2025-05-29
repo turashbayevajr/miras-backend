@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Put,
+} from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { Role, Plan } from '@prisma/client';
 
@@ -12,13 +21,19 @@ export class AdminController {
   }
 
   @Get('user/:id')
-  getUser( @Param('id') id: string ) {
+  getUser(@Param('id') id: string) {
     return this.adminService.getUser(id);
   }
 
   @Post('users')
   createUser(
-    @Body() body: { fullName: string; email: string; password: string; role: Role }
+    @Body()
+    body: {
+      fullName: string;
+      email: string;
+      password: string;
+      role: Role;
+    },
   ) {
     return this.adminService.createUser(body);
   }
@@ -26,7 +41,14 @@ export class AdminController {
   @Patch('users/:id')
   updateUser(
     @Param('id') id: string,
-    @Body() body: Partial<{ fullName: string; email: string; password: string; plan: Plan ;role: Role }>
+    @Body()
+    body: Partial<{
+      fullName: string;
+      email: string;
+      password: string;
+      plan: Plan;
+      role: Role;
+    }>,
   ) {
     return this.adminService.updateUser(id, body);
   }

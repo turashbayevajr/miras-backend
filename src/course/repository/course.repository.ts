@@ -1,9 +1,9 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../../prisma/prisma.service";
-import { CreateCourseDto } from "../api/dtos/create-course.dto";
-import { UpdateCourseDto } from "../api/dtos/update-course.dto";
-import { Course } from "./course.model";
-import { Plan } from "@prisma/client";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateCourseDto } from '../api/dtos/create-course.dto';
+import { UpdateCourseDto } from '../api/dtos/update-course.dto';
+import { Course } from './course.model';
+import { Plan } from '@prisma/client';
 
 @Injectable()
 export class CourseRepository {
@@ -15,7 +15,7 @@ export class CourseRepository {
 
   async findAll(): Promise<Course[]> {
     return this.prisma.course.findMany({
-      where: { deletedAt:null },
+      where: { deletedAt: null },
       orderBy: {
         createdAt: 'asc',
       },
@@ -32,56 +32,58 @@ export class CourseRepository {
       },
     }) as unknown as Course[];
   }
-async findCoursesByUserEnrollment(userId: string): Promise<Course[]> {
-  return this.prisma.course.findMany({
-    where: {
-      deletedAt: null,
-      enrollments: {
-        some: {
-          userId,
-          is_approved: true,
-          deletedAt:null
+  async findCoursesByUserEnrollment(userId: string): Promise<Course[]> {
+    return this.prisma.course.findMany({
+      where: {
+        deletedAt: null,
+        enrollments: {
+          some: {
+            userId,
+            is_approved: true,
+            deletedAt: null,
+          },
         },
       },
-    },
-    orderBy: {
-      createdAt: 'asc',
-    },
-  }) as unknown as Course[];
-}
-async findPendingByUserEnrollment(userId: string): Promise<Course[]> {
-  return this.prisma.course.findMany({
-    where: {
-      deletedAt: null,
-      enrollments: {
-        some: {
-          userId,
-          is_approved: false,
-          deletedAt:null
+      orderBy: {
+        createdAt: 'asc',
+      },
+    }) as unknown as Course[];
+  }
+  async findPendingByUserEnrollment(userId: string): Promise<Course[]> {
+    return this.prisma.course.findMany({
+      where: {
+        deletedAt: null,
+        enrollments: {
+          some: {
+            userId,
+            is_approved: false,
+            deletedAt: null,
+          },
         },
       },
-    },
-    orderBy: {
-      createdAt: 'asc',
-    },
-  }) as unknown as Course[];
-}
+      orderBy: {
+        createdAt: 'asc',
+      },
+    }) as unknown as Course[];
+  }
 
-  
   async findById(id: string): Promise<Course | null> {
     return this.prisma.course.findUnique({
-      where: { 
-        id,  
-        deletedAt:null 
-      }, 
+      where: {
+        id,
+        deletedAt: null,
+      },
       include: {
         lessons: true,
-    },
-   }) as unknown as Course;
+      },
+    }) as unknown as Course;
   }
 
   async update(id: string, data: UpdateCourseDto): Promise<Course> {
-    return this.prisma.course.update({ where: { id }, data }) as unknown as Course;
+    return this.prisma.course.update({
+      where: { id },
+      data,
+    }) as unknown as Course;
   }
 
   async delete(id: string): Promise<Course> {
@@ -89,7 +91,7 @@ async findPendingByUserEnrollment(userId: string): Promise<Course[]> {
       where: { id },
       data: { deletedAt: new Date() },
     }) as unknown as Course;
-  }  
+  }
 
   async deleteMany(ids: string[]): Promise<number> {
     const res = await this.prisma.course.updateMany({
@@ -98,5 +100,4 @@ async findPendingByUserEnrollment(userId: string): Promise<Course[]> {
     });
     return res.count;
   }
-  
 }

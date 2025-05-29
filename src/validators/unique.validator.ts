@@ -1,7 +1,13 @@
-import { registerDecorator, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from "class-validator";
-import { PrismaClient } from "@prisma/client";
-import { Injectable, Logger } from "@nestjs/common";
-import messages from "../configs/messages";
+import {
+  registerDecorator,
+  ValidationOptions,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+  ValidationArguments,
+} from 'class-validator';
+import { PrismaClient } from '@prisma/client';
+import { Injectable, Logger } from '@nestjs/common';
+import messages from '../configs/messages';
 
 @ValidatorConstraint({ async: true })
 @Injectable()
@@ -24,7 +30,14 @@ export class UniqueValidator implements ValidatorConstraintInterface {
       });
       return !existingRecord;
     } catch (error) {
-      this.logger.error(messages.PRISMA_VALIDATION_ERROR(entityName, field, value, error.message));
+      this.logger.error(
+        messages.PRISMA_VALIDATION_ERROR(
+          entityName,
+          field,
+          value,
+          error.message,
+        ),
+      );
       return false;
     }
   }
@@ -35,7 +48,11 @@ export class UniqueValidator implements ValidatorConstraintInterface {
   }
 }
 
-export function Unique<T extends string>(entity: T, field: string, validationOptions?: ValidationOptions) {
+export function Unique<T extends string>(
+  entity: T,
+  field: string,
+  validationOptions?: ValidationOptions,
+) {
   return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
