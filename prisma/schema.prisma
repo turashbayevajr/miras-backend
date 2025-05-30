@@ -26,6 +26,7 @@ model User {
   fullName     String
   email        String       @unique
   password     String
+  avatar       String?
   role         Role
   plan         Plan
   refreshToken String?
@@ -51,14 +52,17 @@ model Course {
 }
 
 model Enrollment {
-  id          String    @id @default(uuid())
-  user        User      @relation(fields: [userId], references: [id])
-  userId      String
-  is_approved Boolean   @default(false)
-  course      Course    @relation(fields: [courseId], references: [id])
-  courseId    String
-  enrolledAt  DateTime  @default(now())
-  deletedAt   DateTime?
+  id              String    @id @default(uuid())
+  user            User      @relation(fields: [userId], references: [id])
+  userId          String
+  is_approved     Boolean   @default(false)
+  course          Course    @relation(fields: [courseId], references: [id])
+  courseId        String
+  enrolledAt      DateTime  @default(now())
+  deletedAt       DateTime?
+  overallProgress Float?
+
+  LessonProgress LessonProgress[]
 }
 
 model Lesson {
@@ -72,6 +76,8 @@ model Lesson {
   test      Test?
   createdAt DateTime  @default(now())
   deletedAt DateTime?
+
+  LessonProgress LessonProgress[]
 }
 
 model Homework {
@@ -122,6 +128,7 @@ model Submission {
   testAnswers    Json?
   score          Float?
   score_homework Float?
+  passed         Boolean?
   score_test     Float?
   submittedAt    DateTime  @default(now())
   deletedAt      DateTime?
@@ -145,4 +152,22 @@ model AdminAnalyticsSnapshot {
   courseCount     Int
   lessonCount     Int
   submissionCount Int
+}
+
+model LessonProgress {
+  id           String     @id @default(uuid())
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id])
+  enrollmentId String
+  lesson       Lesson     @relation(fields: [lessonId], references: [id])
+  lessonId     String
+
+  isCompleted Boolean   @default(false)
+  testScore   Float? // процент за тест
+  unlockedAt  DateTime? // дата, когда урок открылся
+  completedAt DateTime? // дата, когда урок пройден
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([enrollmentId, lessonId])
 }
