@@ -67,17 +67,57 @@ export class CourseRepository {
     }) as unknown as Course[];
   }
 
-  async findById(id: string): Promise<Course | null> {
-    return this.prisma.course.findUnique({
-      where: {
-        id,
-        deletedAt: null,
+async findById(id: string, userId?: string): Promise<Course | null> {
+  const includeLessons: any = {
+    where: { deletedAt: null },
+    include: {},
+  };
+
+  if (userId) {
+    includeLessons.include = {
+      homework: {
+        select: {
+          id: true,
+          submissions: {
+            where: { userId },
+            select: {
+              id: true,
+              score_homework: true,
+              passed: true,
+              score: true,
+              submittedAt: true,
+            },
+          },
+        },
       },
-      include: {
-        lessons: true,
+      test: {
+        select: {
+          id: true,
+          submissions: {
+            where: { userId },
+            select: {
+              id: true,
+              score_test: true,
+              score: true,
+              passed: true,
+              submittedAt: true,
+            },
+          },
+        },
       },
-    }) as unknown as Course;
+    };
   }
+
+  return this.prisma.course.findUnique({
+    where: {
+      id,
+      deletedAt: null,
+    },
+    include: {
+      lessons: includeLessons,
+    },
+  }) as unknown as Course;
+}
 
   async update(id: string, data: UpdateCourseDto): Promise<Course> {
     return this.prisma.course.update({

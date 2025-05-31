@@ -1,4 +1,4 @@
-import { IsBoolean, IsOptional, IsUUID } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsUUID } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import messages from '../../../configs/messages';
 import { Exists } from '../../../validators/exists.validator';
@@ -28,4 +28,10 @@ export class UpdateEnrollmentDto {
   @IsBoolean({ message: messages.MUST_BE_BOOLEAN('Is Active') })
   @Transform(({ value }) => value === 'false' || value === false)
   is_approved?: boolean;
+
+
+  @ApiPropertyOptional({ example: 85.5 })
+  @IsOptional()
+  @IsNumber({}, { message: messages.MUST_BE_NUMBER('Score') })
+  overallProgress?: number;
 }

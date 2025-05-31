@@ -97,4 +97,23 @@ export class EnrollmentRepository {
       },
     }) as unknown as Enrollment;
   }
+  async findAllWithCourseAndLessons(){
+  return this.prisma.enrollment.findMany({
+    where: { deletedAt: null },
+    include: {
+      course: {
+        include: {
+          lessons: {
+            where: { deletedAt: null },
+            include: {
+              test: { select: { id: true } },
+              homework: { select: { id: true } },
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
 }

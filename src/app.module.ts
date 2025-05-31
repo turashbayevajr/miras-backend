@@ -12,6 +12,7 @@ import { HomeworkModule } from './homework/homework.module';
 import { TestModule } from './test/test.module';
 import { SubmissionModule } from './submission/submission.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { CourseProgressModule } from './course-progress/course-progress.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     TestModule,
     SubmissionModule,
     AnalyticsModule,
+    CourseProgressModule,
   ],
   controllers: [AppController],
   providers: [AppService],

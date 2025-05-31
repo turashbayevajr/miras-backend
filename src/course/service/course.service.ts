@@ -85,28 +85,33 @@ export class CourseService {
     }
   }
 
-  async getCourseById(id: string): Promise<Course> {
-    try {
-      const course = await this.courseRepository.findById(id);
-      if (!course) {
-        throw new NotFoundException(
-          messages.NOT_FOUND_BY_ID(this.entityName, id),
-        );
-      }
-      return course;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      this.logger.error(
-        messages.DATABASE_FETCH_ERROR_BY_ID(this.entityName, id),
-        error.stack,
-      );
-      throw new InternalServerErrorException(
-        messages.DATABASE_FETCH_ERROR_BY_ID(this.entityName, id),
+async getCourseById(id: string, userId?: string): Promise<Course> {
+  try {
+    const course = await this.courseRepository.findById(id, userId);
+
+    if (!course) {
+      throw new NotFoundException(
+        messages.NOT_FOUND_BY_ID(this.entityName, id),
       );
     }
+
+    return course;
+  } catch (error) {
+    if (error instanceof NotFoundException) {
+      throw error;
+    }
+
+    this.logger.error(
+      messages.DATABASE_FETCH_ERROR_BY_ID(this.entityName, id),
+      error.stack,
+    );
+
+    throw new InternalServerErrorException(
+      messages.DATABASE_FETCH_ERROR_BY_ID(this.entityName, id),
+    );
   }
+}
+
 
   async updateCourse(id: string, dto: UpdateCourseDto): Promise<Course> {
     try {

@@ -112,6 +112,33 @@ async findAll(filters: {
   });
 }
 
+async findAllForRecalculation(): Promise<Submission[]> {
+  return this.prisma.submission.findMany({
+    where: { deletedAt: null },
+    include: {
+      test: {
+        include: {
+          questions: {
+            include: {
+              variants: true,
+            },
+          },
+        },
+      },
+      homework: true,
+    },
+  }) as unknown as Submission[];
+}
+async findPassedByUser(userId: string) {
+  return this.prisma.submission.findMany({
+    where: {
+      userId,
+      passed: true,
+      deletedAt: null,
+    },
+  });
+}
+
 
   async findById(id: string): Promise<Submission | null> {
     return this.prisma.submission.findUnique({
@@ -158,9 +185,8 @@ async findAll(filters: {
   }
 
   async delete(id: string): Promise<Submission> {
-    return this.prisma.submission.update({
-      where: { id },
-      data: { deletedAt: new Date() },
+    return this.prisma.submission.delete({
+      where: { id }
     }) as unknown as Submission;
   }
 

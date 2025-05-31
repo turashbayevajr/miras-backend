@@ -78,6 +78,7 @@ export class SubmissionController {
   @ApiOperation({ summary: 'Update a submission' })
   @ApiResponse({ status: 200, description: 'Submission updated' })
   async update(@Param('id') id: string, @Body() dto: UpdateSubmissionDto) {
+    console.log(dto)
     return this.service.updateSubmission(id, dto);
   }
 

@@ -1,6 +1,7 @@
-import { IsOptional, IsString, IsNumber, IsObject } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsObject, IsBoolean } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import messages from '../../../configs/messages';
+import { Transform } from 'class-transformer';
 
 export class UpdateSubmissionDto {
   @ApiPropertyOptional({ example: 'Updated content...' })
@@ -41,4 +42,13 @@ export class UpdateSubmissionDto {
     message: 'testAnswers должен быть объектом: { [questionId]: string[] }',
   })
   testAnswers?: Record<string, string[]>;
+
+  @ApiPropertyOptional({
+    example: false,
+    description: 'Status of discount (true or false)',
+  })
+  @IsOptional()
+  @IsBoolean({ message: messages.MUST_BE_BOOLEAN('Passed') })
+  @Transform(({ value }) => value === 'false' || value === false)
+  passed?: boolean;
 }

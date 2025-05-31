@@ -26,11 +26,8 @@ export class EnrollmentService {
 
       if (existing) {
         if (existing.deletedAt) {
-          // ✅ Restore soft-deleted enrollment
           return await this.enrollmentRepository.restore(existing.id);
         }
-
-        // ❌ Already exists and active
         throw new InternalServerErrorException(
           messages.ALREADY_EXIST(this.entityName),
         );
@@ -171,4 +168,13 @@ export class EnrollmentService {
       );
     }
   }
+  async getAllEnrollmentsWithCourseAndLessons(){
+  try {
+    return await this.enrollmentRepository.findAllWithCourseAndLessons();
+  } catch (error) {
+    this.logger.error(messages.DATABASE_FETCH_ERROR(this.entityName), error.stack);
+    throw new InternalServerErrorException(messages.DATABASE_FETCH_ERROR(this.entityName));
+  }
+}
+
 }

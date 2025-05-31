@@ -6,10 +6,10 @@ import {
   Delete,
   Param,
   Body,
-  UsePipes,
-  ValidationPipe,
   Req,
   UnauthorizedException,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { CourseService } from '../service/course.service';
 import { CreateCourseDto } from './dtos/create-course.dto';
@@ -20,9 +20,11 @@ import {
   ApiResponse,
   ApiBody,
   ApiParam,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { CourseDto } from './dtos/course.dto';
 import { JwtService } from '@nestjs/jwt';
+import { JwtAuthGuard } from 'src/auth/jwt.guard';
 
 @ApiTags('Courses')
 @Controller('course')
@@ -73,13 +75,17 @@ export class CourseController {
     return this.service.getMyPendingCourses(id);
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get course by ID' })
-  @ApiParam({ name: 'id', description: 'Course ID', type: String })
-  @ApiResponse({ status: 200, description: 'Course found' })
-  async findOne(@Param('id') id: string) {
-    return this.service.getCourseById(id);
-  }
+@Get(':id')
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard)
+@ApiOperation({ summary: 'Get course by ID and include student submissions' })
+@ApiParam({ name: 'id', description: 'Course ID', type: String })
+@ApiResponse({ status: 200, description: 'Course found with lesson results' })
+async findOne(@Param('id') id: string, @Request() req) {
+  const userId = req.user.sub;
+  return this.service.getCourseById(id, userId);
+}
+
 
   @Put(':id')
   @ApiOperation({ summary: 'Update a course' })

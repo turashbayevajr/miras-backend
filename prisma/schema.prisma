@@ -62,7 +62,7 @@ model Enrollment {
   deletedAt       DateTime?
   overallProgress Float?
 
-  LessonProgress LessonProgress[]
+  CourseProgress CourseProgress[]
 }
 
 model Lesson {
@@ -76,8 +76,6 @@ model Lesson {
   test      Test?
   createdAt DateTime  @default(now())
   deletedAt DateTime?
-
-  LessonProgress LessonProgress[]
 }
 
 model Homework {
@@ -154,20 +152,14 @@ model AdminAnalyticsSnapshot {
   submissionCount Int
 }
 
-model LessonProgress {
-  id           String     @id @default(uuid())
-  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id])
-  enrollmentId String
-  lesson       Lesson     @relation(fields: [lessonId], references: [id])
-  lessonId     String
-
-  isCompleted Boolean   @default(false)
-  testScore   Float? // процент за тест
-  unlockedAt  DateTime? // дата, когда урок открылся
-  completedAt DateTime? // дата, когда урок пройден
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([enrollmentId, lessonId])
+model CourseProgress {
+  id               String     @id @default(uuid())
+  enrollment       Enrollment @relation(fields: [enrollmentId], references: [id])
+  enrollmentId     String     @unique
+  totalLessons     Int
+  completedLessons Int
+  progressPercent  Float
+  averageScore     Float?
+  updatedAt        DateTime   @updatedAt
+  createdAt        DateTime   @default(now())
 }

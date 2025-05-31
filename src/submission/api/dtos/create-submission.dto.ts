@@ -5,10 +5,12 @@ import {
   IsOptional,
   IsNumber,
   IsObject,
+  IsBoolean,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import messages from '../../../configs/messages';
 import { Exists } from '../../../validators/exists.validator';
+import { Transform } from 'class-transformer';
 
 export class CreateSubmissionDto {
   @ApiProperty({ example: 'uuid-of-user' })
@@ -72,4 +74,13 @@ export class CreateSubmissionDto {
     message: 'testAnswers должен быть объектом: { [questionId]: string[] }',
   })
   testAnswers?: Record<string, string[]>;
+
+  @ApiPropertyOptional({
+    example: false,
+    description: 'Status of discount (true or false)',
+  })
+  @IsOptional()
+  @IsBoolean({ message: messages.MUST_BE_BOOLEAN('Is Active') })
+  @Transform(({ value }) => value === 'false' || value === false)
+  passed?: boolean;
 }
