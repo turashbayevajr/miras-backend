@@ -24,84 +24,84 @@ export class SubmissionService {
     private readonly testService: TestService,
   ) {}
 
-async createSubmission(dto: CreateSubmissionDto): Promise<Submission> {
-  try {
-    let score_test: number | undefined = undefined;
-    let score_homework: number | undefined = undefined;
-    let passed = false;
+  async createSubmission(dto: CreateSubmissionDto): Promise<Submission> {
+    try {
+      let score_test: number | undefined = undefined;
+      let score_homework: number | undefined = undefined;
+      let passed = false;
 
-    // 1. Оценка за тест
-    if (dto.testId) {
-      const test = await this.testService.getTestById(dto.testId);
-      if (!test) {
-        throw new NotFoundException(`Test not found with id: ${dto.testId}`);
+      // 1. Оценка за тест
+      if (dto.testId) {
+        const test = await this.testService.getTestById(dto.testId);
+        if (!test) {
+          throw new NotFoundException(`Test not found with id: ${dto.testId}`);
+        }
+        if (!test.questions || test.questions.length === 0) {
+          throw new BadRequestException('У теста нет вопросов для оценки.');
+        }
+
+        const total = test.questions.length;
+        let correct = 0;
+
+        test.questions.forEach((q) => {
+          const correctIds = q.variants
+            .filter((v) => v.isCorrect)
+            .map((v) => v.id);
+          const selected = dto.testAnswers?.[q.id] || [];
+
+          const isCorrect =
+            correctIds.length === selected.length &&
+            correctIds.every((id) => selected.includes(id));
+
+          if (isCorrect) correct++;
+        });
+
+        score_test = Number(((correct / total) * 100).toFixed(2));
+      } else {
+        // если теста нет — считаем как 100
+        score_test = 100;
       }
-      if (!test.questions || test.questions.length === 0) {
-        throw new BadRequestException('У теста нет вопросов для оценки.');
+
+      // 2. Оценка за ДЗ
+      if (!dto.testId && dto.content) {
+        // если нет теста, но есть ДЗ → auto full score
+        score_homework = 100;
+      } else if (dto.homeworkId && !dto.content) {
+        // если есть ДЗ, но пустой content — ноль
+        score_homework = 0;
       }
 
-      const total = test.questions.length;
-      let correct = 0;
+      // 3. Финальный score
+      const parts = [score_test, score_homework].filter(
+        (s) => s !== undefined,
+      ) as number[];
 
-      test.questions.forEach((q) => {
-        const correctIds = q.variants
-          .filter((v) => v.isCorrect)
-          .map((v) => v.id);
-        const selected = dto.testAnswers?.[q.id] || [];
+      const score =
+        parts.length > 0
+          ? Number((parts.reduce((a, b) => a + b, 0) / parts.length).toFixed(2))
+          : 0;
 
-        const isCorrect =
-          correctIds.length === selected.length &&
-          correctIds.every((id) => selected.includes(id));
+      passed = score >= 50;
 
-        if (isCorrect) correct++;
+      const saved = await this.repo.create({
+        ...dto,
+        score_test,
+        score_homework,
+        score,
+        passed,
       });
 
-      score_test = Number(((correct / total) * 100).toFixed(2));
-    } else {
-      // если теста нет — считаем как 100
-      score_test = 100;
+      return saved;
+    } catch (error) {
+      this.logger.error(
+        messages.DATABASE_CREATE_ERROR(this.entityName),
+        error.stack,
+      );
+      throw new InternalServerErrorException(
+        messages.DATABASE_CREATE_ERROR(this.entityName),
+      );
     }
-
-    // 2. Оценка за ДЗ
-    if (!dto.testId && dto.content) {
-      // если нет теста, но есть ДЗ → auto full score
-      score_homework = 100;
-    } else if (dto.homeworkId && !dto.content) {
-      // если есть ДЗ, но пустой content — ноль
-      score_homework = 0;
-    }
-
-    // 3. Финальный score
-    const parts = [score_test, score_homework].filter(
-      (s) => s !== undefined,
-    ) as number[];
-
-    const score =
-      parts.length > 0
-        ? Number((parts.reduce((a, b) => a + b, 0) / parts.length).toFixed(2))
-        : 0;
-
-    passed = score >= 50;
-
-    const saved = await this.repo.create({
-      ...dto,
-      score_test,
-      score_homework,
-      score,
-      passed,
-    });
-
-    return saved;
-  } catch (error) {
-    this.logger.error(
-      messages.DATABASE_CREATE_ERROR(this.entityName),
-      error.stack,
-    );
-    throw new InternalServerErrorException(
-      messages.DATABASE_CREATE_ERROR(this.entityName),
-    );
   }
-}
 
   async getAllSubmissions(filters: {
     userId?: string;
@@ -111,7 +111,7 @@ async createSubmission(dto: CreateSubmissionDto): Promise<Submission> {
     endDate?: string;
   }): Promise<Submission[]> {
     try {
-      await this.recalculateAllSubmissions()
+      await this.recalculateAllSubmissions();
       return this.repo.findAll(filters);
     } catch (error) {
       this.logger.error(
@@ -124,72 +124,84 @@ async createSubmission(dto: CreateSubmissionDto): Promise<Submission> {
     }
   }
   async recalculateAllSubmissions(): Promise<number> {
-  try {
-    const submissions = await this.repo.findAllForRecalculation();
-    let updatedCount = 0;
+    try {
+      const submissions = await this.repo.findAllForRecalculation();
+      let updatedCount = 0;
 
-    for (const submission of submissions) {
-      let { test, homework, testAnswers, content } = submission;
-      let score_test: number | undefined = undefined;
-      let score_homework: number | undefined = undefined;
+      for (const submission of submissions) {
+        let { test, homework, testAnswers, content } = submission;
+        let score_test: number | undefined = undefined;
+        let score_homework: number | undefined = undefined;
 
-if (test?.questions?.length && testAnswers) {
-  let correct = 0;
-  const total = test.questions.length;
+        if (test?.questions?.length && testAnswers) {
+          let correct = 0;
+          const total = test.questions.length;
 
-  for (const q of test.questions) {
-    const correctIds = q.variants.filter(v => v.isCorrect).map(v => v.id);
-    const selected = testAnswers[q.id] || [];
+          for (const q of test.questions) {
+            const correctIds = q.variants
+              .filter((v) => v.isCorrect)
+              .map((v) => v.id);
+            const selected = testAnswers[q.id] || [];
 
-    const isCorrect =
-      correctIds.length === selected.length &&
-      correctIds.every((id) => selected.includes(id));
+            const isCorrect =
+              correctIds.length === selected.length &&
+              correctIds.every((id) => selected.includes(id));
 
-    if (isCorrect) correct++;
-  }
+            if (isCorrect) correct++;
+          }
 
-        score_test = Number(((correct / total) * 100).toFixed(2));
-      } else if (test) {
-        score_test = 0;
-      } else {
-        score_test = 100;
+          score_test = Number(((correct / total) * 100).toFixed(2));
+        } else if (test) {
+          score_test = 0;
+        } else {
+          score_test = 100;
+        }
+
+        if (homework && content) {
+          score_homework = 100;
+        } else if (homework) {
+          score_homework = 0;
+        }
+        const parts = [score_test, score_homework].filter(
+          (s) => s !== undefined,
+        ) as number[];
+        const score =
+          parts.length > 0
+            ? Number(
+                (parts.reduce((a, b) => a + b, 0) / parts.length).toFixed(2),
+              )
+            : 0;
+
+        const passed = score >= 50;
+
+        const isDifferent =
+          submission.score !== score ||
+          submission.score_test !== score_test ||
+          submission.score_homework !== score_homework ||
+          submission.passed !== passed;
+
+        if (isDifferent) {
+          await this.repo.update(submission.id, {
+            score,
+            score_test,
+            score_homework,
+            passed,
+          });
+          updatedCount++;
+        }
       }
 
-      if (homework && content) {
-        score_homework = 100;
-      } else if (homework) {
-        score_homework = 0;
-      }
-      const parts = [score_test, score_homework].filter((s) => s !== undefined) as number[];
-      const score = parts.length > 0
-        ? Number((parts.reduce((a, b) => a + b, 0) / parts.length).toFixed(2))
-        : 0;
-
-      const passed = score >= 50;
-
-      const isDifferent =
-        submission.score !== score ||
-        submission.score_test !== score_test ||
-        submission.score_homework !== score_homework ||
-        submission.passed !== passed;
-
-      if (isDifferent) {
-        await this.repo.update(submission.id, {
-          score,
-          score_test,
-          score_homework,
-          passed,
-        });
-        updatedCount++;
-      }
+      return updatedCount;
+    } catch (error) {
+      this.logger.error(
+        messages.DATABASE_UPDATE_ERROR(this.entityName, 'bulk'),
+        error.stack,
+      );
+      throw new InternalServerErrorException(
+        messages.DATABASE_UPDATE_ERROR(this.entityName, 'bulk'),
+      );
     }
-
-    return updatedCount;
-  } catch (error) {
-    this.logger.error(messages.DATABASE_UPDATE_ERROR(this.entityName, 'bulk'), error.stack);
-    throw new InternalServerErrorException(messages.DATABASE_UPDATE_ERROR(this.entityName, 'bulk'));
   }
-}
 
   async getPassedByUser(userId: string) {
     try {
@@ -229,62 +241,71 @@ if (test?.questions?.length && testAnswers) {
     return this.repo.findByUserAndLessonLinks(userId, testId, homeworkId);
   }
 
-async updateSubmission(id: string, dto: UpdateSubmissionDto): Promise<Submission> {
-  try {
-    const submission = await this.getSubmissionById(id);
+  async updateSubmission(
+    id: string,
+    dto: UpdateSubmissionDto,
+  ): Promise<Submission> {
+    try {
+      const submission = await this.getSubmissionById(id);
 
-    let score_test = submission.score_test ?? 0;
-    let score_homework = submission.score_homework ?? 0;
+      let score_test = submission.score_test ?? 0;
+      let score_homework = submission.score_homework ?? 0;
 
-    if (dto.testAnswers) {
-      const test = await this.testService.getTestById(submission.testId!);
-      if (!test || !test.questions || test.questions.length === 0) {
-        throw new BadRequestException('У теста нет вопросов для оценки.');
+      if (dto.testAnswers) {
+        const test = await this.testService.getTestById(submission.testId!);
+        if (!test || !test.questions || test.questions.length === 0) {
+          throw new BadRequestException('У теста нет вопросов для оценки.');
+        }
+
+        let correct = 0;
+        const total = test.questions.length;
+
+        for (const question of test.questions) {
+          const correctIds = question.variants
+            .filter((v) => v.isCorrect)
+            .map((v) => v.id);
+          const selected = dto.testAnswers?.[question.id] || [];
+
+          const isCorrect =
+            correctIds.length === selected.length &&
+            correctIds.every((id) => selected.includes(id));
+
+          if (isCorrect) correct++;
+        }
+
+        score_test = Number(((correct / total) * 100).toFixed(2));
       }
 
-      let correct = 0;
-      const total = test.questions.length;
-
-      for (const question of test.questions) {
-        const correctIds = question.variants.filter(v => v.isCorrect).map(v => v.id);
-        const selected = dto.testAnswers?.[question.id] || [];
-
-        const isCorrect =
-          correctIds.length === selected.length &&
-          correctIds.every((id) => selected.includes(id));
-
-        if (isCorrect) correct++;
+      // 2. Reset homework score if content updated
+      if (dto.content !== undefined) {
+        score_homework = 0;
       }
 
-      score_test = Number(((correct / total) * 100).toFixed(2));
+      // 3. Recalculate total score
+      const score = Number(((score_test + score_homework) / 2).toFixed(2));
+      const passed = score >= 50;
+
+      // 4. Now build final data object with all values
+      const updatedData: UpdateSubmissionDto = {
+        ...dto,
+        score_test,
+        score_homework,
+        score,
+        passed,
+      };
+
+      return this.repo.update(id, updatedData);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      this.logger.error(
+        messages.DATABASE_UPDATE_ERROR(this.entityName, id),
+        error.stack,
+      );
+      throw new InternalServerErrorException(
+        messages.DATABASE_UPDATE_ERROR(this.entityName, id),
+      );
     }
-
-    // 2. Reset homework score if content updated
-    if (dto.content !== undefined) {
-      score_homework = 0;
-    }
-
-    // 3. Recalculate total score
-    const score = Number(((score_test + score_homework) / 2).toFixed(2));
-    const passed = score >= 50;
-
-    // 4. Now build final data object with all values
-    const updatedData: UpdateSubmissionDto = {
-      ...dto,
-      score_test,
-      score_homework,
-      score,
-      passed,
-    };
-
-    return this.repo.update(id, updatedData);
-  } catch (error) {
-    if (error instanceof NotFoundException) throw error;
-    this.logger.error(messages.DATABASE_UPDATE_ERROR(this.entityName, id), error.stack);
-    throw new InternalServerErrorException(messages.DATABASE_UPDATE_ERROR(this.entityName, id));
   }
-}
-
 
   async deleteSubmission(id: string): Promise<Submission> {
     try {

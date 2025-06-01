@@ -48,9 +48,9 @@ export class LessonService {
       );
     }
   }
-    async getLessonsByCourse(courseId: string): Promise<Lesson[]> {
+  async getLessonsByCourse(courseId: string): Promise<Lesson[]> {
     try {
-       const course = await this.courseService.getCourseById(courseId);
+      const course = await this.courseService.getCourseById(courseId);
       if (!course)
         throw new NotFoundException(
           messages.NOT_FOUND_BY_ID(this.entityName, courseId),

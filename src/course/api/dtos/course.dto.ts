@@ -29,8 +29,7 @@ export class CourseDto {
   @Exists('user', {
     message: (args) => messages.INVALID_RELATION('User', args.value),
   })
-  @IsOptional()
-  creatorId?: string;
+  creatorId: string;
 
   @ApiProperty({ example: 'PREMIUM', enum: Plan })
   @IsEnum(Plan, { message: messages.INVALID_ENUM('Plan') })

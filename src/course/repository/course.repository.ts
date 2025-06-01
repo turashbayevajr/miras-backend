@@ -4,12 +4,13 @@ import { CreateCourseDto } from '../api/dtos/create-course.dto';
 import { UpdateCourseDto } from '../api/dtos/update-course.dto';
 import { Course } from './course.model';
 import { Plan } from '@prisma/client';
+import { CourseDto } from '../api/dtos/course.dto';
 
 @Injectable()
 export class CourseRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: CreateCourseDto): Promise<Course> {
+  async create(data: CourseDto): Promise<Course> {
     return this.prisma.course.create({ data }) as unknown as Course;
   }
 
@@ -66,9 +67,10 @@ export class CourseRepository {
       },
     }) as unknown as Course[];
   }
-async findByCreatorOrEnrolled(userId: string): Promise<Course[]> {
+  async findByCreatorOrEnrolled(userId: string): Promise<Course[]> {
     return this.prisma.course.findMany({
       where: {
+        deletedAt: null,
         OR: [
           { creatorId: userId },
           {
@@ -80,67 +82,81 @@ async findByCreatorOrEnrolled(userId: string): Promise<Course[]> {
             },
           },
         ],
+      },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
+        enrollments: {
+          // include all enrollments (not filtered by user)
+          include: {
+            user: {
+              select: {
+                id: true,
+                fullName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async findById(id: string, userId?: string): Promise<Course | null> {
+    const includeLessons: any = {
+      where: { deletedAt: null },
+      include: {},
+    };
+
+    if (userId) {
+      includeLessons.include = {
+        homework: {
+          select: {
+            id: true,
+            submissions: {
+              where: { userId },
+              select: {
+                id: true,
+                score_homework: true,
+                passed: true,
+                score: true,
+                submittedAt: true,
+              },
+            },
+          },
+        },
+        test: {
+          select: {
+            id: true,
+            submissions: {
+              where: { userId },
+              select: {
+                id: true,
+                score_test: true,
+                score: true,
+                passed: true,
+                submittedAt: true,
+              },
+            },
+          },
+        },
+      };
+    }
+
+    return this.prisma.course.findUnique({
+      where: {
+        id,
         deletedAt: null,
       },
       include: {
-        creator: true,
-        enrollments: {
-          where: { userId },
-        },
+        lessons: includeLessons,
       },
-    })  as unknown as Course[];
+    }) as unknown as Course;
   }
-async findById(id: string, userId?: string): Promise<Course | null> {
-  const includeLessons: any = {
-    where: { deletedAt: null },
-    include: {},
-  };
-
-  if (userId) {
-    includeLessons.include = {
-      homework: {
-        select: {
-          id: true,
-          submissions: {
-            where: { userId },
-            select: {
-              id: true,
-              score_homework: true,
-              passed: true,
-              score: true,
-              submittedAt: true,
-            },
-          },
-        },
-      },
-      test: {
-        select: {
-          id: true,
-          submissions: {
-            where: { userId },
-            select: {
-              id: true,
-              score_test: true,
-              score: true,
-              passed: true,
-              submittedAt: true,
-            },
-          },
-        },
-      },
-    };
-  }
-
-  return this.prisma.course.findUnique({
-    where: {
-      id,
-      deletedAt: null,
-    },
-    include: {
-      lessons: includeLessons,
-    },
-  }) as unknown as Course;
-}
 
   async update(id: string, data: UpdateCourseDto): Promise<Course> {
     return this.prisma.course.update({

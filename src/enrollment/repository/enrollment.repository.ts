@@ -97,89 +97,87 @@ export class EnrollmentRepository {
       },
     }) as unknown as Enrollment;
   }
-  async findAllWithCourseAndLessons(){
-  return this.prisma.enrollment.findMany({
-    where: { deletedAt: null },
-    include: {
-      course: {
-        include: {
-          lessons: {
-            where: { deletedAt: null },
-            include: {
-              test: { select: { id: true } },
-              homework: { select: { id: true } },
+  async findAllWithCourseAndLessons() {
+    return this.prisma.enrollment.findMany({
+      where: { deletedAt: null },
+      include: {
+        course: {
+          include: {
+            lessons: {
+              where: { deletedAt: null },
+              include: {
+                test: { select: { id: true } },
+                homework: { select: { id: true } },
+              },
             },
           },
         },
       },
-    },
-  });
-}
-async findPendingByTeacher(userId: string){
-  const courseIds = await this.prisma.course.findMany({
-    where: {
-      deletedAt: null,
-      OR: [
-        { creatorId: userId },
-        {
-          enrollments: {
-            some: {
-              userId,
-              deletedAt: null,
+    });
+  }
+  async findPendingByTeacher(userId: string) {
+    const courseIds = await this.prisma.course.findMany({
+      where: {
+        deletedAt: null,
+        OR: [
+          { creatorId: userId },
+          {
+            enrollments: {
+              some: {
+                userId,
+                deletedAt: null,
+              },
             },
           },
-        },
-      ],
-    },
-    select: { id: true },
-  });
+        ],
+      },
+      select: { id: true },
+    });
 
-  const courseIdList = courseIds.map((c) => c.id);
+    const courseIdList = courseIds.map((c) => c.id);
 
-  return this.prisma.enrollment.findMany({
-    where: {
-      courseId: { in: courseIdList },
-      is_approved: false,
-      deletedAt: null,
-    },
-    include: {
-      user: true,
-      course: true,
-    },
-  });
-}
-async findAllEnrollmentsByTeacher(userId: string) {
-  const courseIds = await this.prisma.course.findMany({
-    where: {
-      deletedAt: null,
-      OR: [
-        { creatorId: userId },
-        {
-          enrollments: {
-            some: {
-              userId,
-              deletedAt: null,
+    return this.prisma.enrollment.findMany({
+      where: {
+        courseId: { in: courseIdList },
+        is_approved: false,
+        deletedAt: null,
+      },
+      include: {
+        user: true,
+        course: true,
+      },
+    });
+  }
+  async findAllEnrollmentsByTeacher(userId: string) {
+    const courseIds = await this.prisma.course.findMany({
+      where: {
+        deletedAt: null,
+        OR: [
+          { creatorId: userId },
+          {
+            enrollments: {
+              some: {
+                userId,
+                deletedAt: null,
+              },
             },
           },
-        },
-      ],
-    },
-    select: { id: true },
-  });
+        ],
+      },
+      select: { id: true },
+    });
 
-  const courseIdList = courseIds.map((c) => c.id);
+    const courseIdList = courseIds.map((c) => c.id);
 
-  return this.prisma.enrollment.findMany({
-    where: {
-      courseId: { in: courseIdList },
-      deletedAt: null,
-    },
-    include: {
-      user: true,
-      course: true,
-    },
-  });
-}
-
-
+    return this.prisma.enrollment.findMany({
+      where: {
+        courseId: { in: courseIdList },
+        deletedAt: null,
+      },
+      include: {
+        user: true,
+        course: true,
+      },
+    });
+  }
 }

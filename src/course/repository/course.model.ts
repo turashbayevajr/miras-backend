@@ -7,5 +7,5 @@ export class Course {
   createdAt: Date;
   creatorId: string;
   plan: Plan;
-  deletedAt?: Date;
+  deletedAt: Date | null;
 }

@@ -10,6 +10,7 @@ import { UpdateCourseDto } from '../api/dtos/update-course.dto';
 import { Course } from '../repository/course.model';
 import messages from '../../configs/messages';
 import { Plan } from '@prisma/client';
+import { CourseDto } from '../api/dtos/course.dto';
 
 @Injectable()
 export class CourseService {
@@ -18,7 +19,7 @@ export class CourseService {
 
   constructor(private readonly courseRepository: CourseRepository) {}
 
-  async createCourse(dto: CreateCourseDto): Promise<Course> {
+  async createCourse(dto: CourseDto): Promise<Course> {
     try {
       return await this.courseRepository.create(dto);
     } catch (error) {
@@ -45,7 +46,7 @@ export class CourseService {
       );
     }
   }
-    async getTeacherCourses(userId: string): Promise<Course[]> {
+  async getTeacherCourses(userId: string): Promise<Course[]> {
     try {
       return this.courseRepository.findByCreatorOrEnrolled(userId);
     } catch (error) {
@@ -98,33 +99,32 @@ export class CourseService {
     }
   }
 
-async getCourseById(id: string, userId?: string): Promise<Course> {
-  try {
-    const course = await this.courseRepository.findById(id, userId);
+  async getCourseById(id: string, userId?: string): Promise<Course> {
+    try {
+      const course = await this.courseRepository.findById(id, userId);
 
-    if (!course) {
-      throw new NotFoundException(
-        messages.NOT_FOUND_BY_ID(this.entityName, id),
+      if (!course) {
+        throw new NotFoundException(
+          messages.NOT_FOUND_BY_ID(this.entityName, id),
+        );
+      }
+
+      return course;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.logger.error(
+        messages.DATABASE_FETCH_ERROR_BY_ID(this.entityName, id),
+        error.stack,
+      );
+
+      throw new InternalServerErrorException(
+        messages.DATABASE_FETCH_ERROR_BY_ID(this.entityName, id),
       );
     }
-
-    return course;
-  } catch (error) {
-    if (error instanceof NotFoundException) {
-      throw error;
-    }
-
-    this.logger.error(
-      messages.DATABASE_FETCH_ERROR_BY_ID(this.entityName, id),
-      error.stack,
-    );
-
-    throw new InternalServerErrorException(
-      messages.DATABASE_FETCH_ERROR_BY_ID(this.entityName, id),
-    );
   }
-}
-
 
   async updateCourse(id: string, dto: UpdateCourseDto): Promise<Course> {
     try {

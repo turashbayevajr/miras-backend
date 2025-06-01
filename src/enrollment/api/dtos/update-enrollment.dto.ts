@@ -26,9 +26,14 @@ export class UpdateEnrollmentDto {
     description: 'Status of discount (true or false)',
   })
   @IsBoolean({ message: messages.MUST_BE_BOOLEAN('Is Active') })
-  @Transform(({ value }) => value === 'false' || value === false)
+  @Transform(({ value }) =>
+    value === 'true' || value === true
+      ? true
+      : value === 'false' || value === false
+        ? false
+        : value,
+  )
   is_approved?: boolean;
-
 
   @ApiPropertyOptional({ example: 85.5 })
   @IsOptional()

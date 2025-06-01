@@ -23,11 +23,11 @@ export class AdminService {
       throw new InternalServerErrorException('Failed to fetch users');
     }
   }
-    async getTeachers() {
+  async getTeachers() {
     try {
       return await this.prisma.user.findMany({
         where: {
-          role: "TEACHER"
+          role: 'TEACHER',
         },
         orderBy: {
           createdAt: 'desc',

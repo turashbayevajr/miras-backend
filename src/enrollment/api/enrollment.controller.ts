@@ -61,24 +61,26 @@ export class EnrollmentController {
     return this.service.getPendingEnrollments();
   }
   @Get('teacher')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth('access-token')
-@ApiOperation({ summary: 'List all enrollments for teacher’s courses' })
-@ApiResponse({ status: 200, description: 'List of all enrollments' })
-async getTeacherEnrollments(@Request() req) {
-  const userId = req.user.sub;
-  return this.service.getAllEnrollmentsForTeacher(userId);
-}
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'List all enrollments for teacher’s courses' })
+  @ApiResponse({ status: 200, description: 'List of all enrollments' })
+  async getTeacherEnrollments(@Request() req) {
+    const userId = req.user.sub;
+    return this.service.getAllEnrollmentsForTeacher(userId);
+  }
 
-@Get('pendings/teacher')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth('access-token')
-@ApiOperation({ summary: 'List all pending enrollments for teacher’s courses' })
-@ApiResponse({ status: 200, description: 'List of pending enrollments' })
-async getTeacherPending(@Request() req) {
-  const userId = req.user.sub;
-  return this.service.getPendingTeacher(userId);
-}
+  @Get('pendings/teacher')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({
+    summary: 'List all pending enrollments for teacher’s courses',
+  })
+  @ApiResponse({ status: 200, description: 'List of pending enrollments' })
+  async getTeacherPending(@Request() req) {
+    const userId = req.user.sub;
+    return this.service.getPendingTeacher(userId);
+  }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get enrollment by ID' })

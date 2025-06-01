@@ -1,5 +1,5 @@
-import { Homework } from "../../homework/repository/homework.model";
-import { Test } from "../../test/repository/test.model";
+import { Homework } from '../../homework/repository/homework.model';
+import { Test } from '../../test/repository/test.model';
 
 export class Submission {
   id: string;

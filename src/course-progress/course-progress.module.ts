@@ -8,8 +8,7 @@ import { CourseProgressRepository } from './repository/course-progress.repositor
 @Module({
   imports: [EnrollmentModule, SubmissionModule],
   controllers: [CourseProgressController],
-  providers: [CourseProgressService,CourseProgressRepository],
-  exports: [CourseProgressService,CourseProgressRepository]
-
+  providers: [CourseProgressService, CourseProgressRepository],
+  exports: [CourseProgressService, CourseProgressRepository],
 })
 export class CourseProgressModule {}

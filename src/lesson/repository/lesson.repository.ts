@@ -50,7 +50,7 @@ export class LessonRepository {
       },
     }) as unknown as Lesson;
   }
-    async findByCourseId(courseId: string): Promise<Lesson[]> {
+  async findByCourseId(courseId: string): Promise<Lesson[]> {
     return this.prisma.lesson.findMany({
       where: { courseId: courseId },
       orderBy: {

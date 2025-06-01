@@ -40,7 +40,7 @@ export class LessonController {
     return this.service.getAllLessons();
   }
 
-  @Get("course/:courseId")
+  @Get('course/:courseId')
   @ApiOperation({ summary: 'List all lessons' })
   @ApiResponse({ status: 200, description: 'Lessons listed' })
   async findCourseLessons(@Param('courseId') courseId: string) {

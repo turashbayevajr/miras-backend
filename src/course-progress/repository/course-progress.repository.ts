@@ -6,7 +6,10 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class CourseProgressRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(filters?: { userId?: string; courseId?: string }): Promise<CourseProgress[]> {
+  async findAll(filters?: {
+    userId?: string;
+    courseId?: string;
+  }): Promise<CourseProgress[]> {
     return this.prisma.courseProgress.findMany({
       where: {
         enrollment: {

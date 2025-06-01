@@ -71,7 +71,7 @@ export class EnrollmentService {
       );
     }
   }
-  async getPendingTeacher(userId: string){
+  async getPendingTeacher(userId: string) {
     try {
       return this.enrollmentRepository.findPendingByTeacher(userId);
     } catch (error) {
@@ -84,7 +84,7 @@ export class EnrollmentService {
       );
     }
   }
-  async getAllEnrollmentsForTeacher(userId: string){
+  async getAllEnrollmentsForTeacher(userId: string) {
     try {
       return this.enrollmentRepository.findAllEnrollmentsByTeacher(userId);
     } catch (error) {
@@ -193,13 +193,17 @@ export class EnrollmentService {
       );
     }
   }
-  async getAllEnrollmentsWithCourseAndLessons(){
-  try {
-    return await this.enrollmentRepository.findAllWithCourseAndLessons();
-  } catch (error) {
-    this.logger.error(messages.DATABASE_FETCH_ERROR(this.entityName), error.stack);
-    throw new InternalServerErrorException(messages.DATABASE_FETCH_ERROR(this.entityName));
+  async getAllEnrollmentsWithCourseAndLessons() {
+    try {
+      return await this.enrollmentRepository.findAllWithCourseAndLessons();
+    } catch (error) {
+      this.logger.error(
+        messages.DATABASE_FETCH_ERROR(this.entityName),
+        error.stack,
+      );
+      throw new InternalServerErrorException(
+        messages.DATABASE_FETCH_ERROR(this.entityName),
+      );
+    }
   }
-}
-
 }

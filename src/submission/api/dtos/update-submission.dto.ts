@@ -1,4 +1,10 @@
-import { IsOptional, IsString, IsNumber, IsObject, IsBoolean } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsObject,
+  IsBoolean,
+} from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import messages from '../../../configs/messages';
 import { Transform } from 'class-transformer';
