@@ -66,7 +66,30 @@ export class CourseRepository {
       },
     }) as unknown as Course[];
   }
-
+async findByCreatorOrEnrolled(userId: string): Promise<Course[]> {
+    return this.prisma.course.findMany({
+      where: {
+        OR: [
+          { creatorId: userId },
+          {
+            enrollments: {
+              some: {
+                userId,
+                deletedAt: null,
+              },
+            },
+          },
+        ],
+        deletedAt: null,
+      },
+      include: {
+        creator: true,
+        enrollments: {
+          where: { userId },
+        },
+      },
+    })  as unknown as Course[];
+  }
 async findById(id: string, userId?: string): Promise<Course | null> {
   const includeLessons: any = {
     where: { deletedAt: null },

@@ -19,7 +19,10 @@ export class AdminController {
   getUsers() {
     return this.adminService.getUsers();
   }
-
+  @Get('teachers')
+  getTeachers() {
+    return this.adminService.getTeachers();
+  }
   @Get('user/:id')
   getUser(@Param('id') id: string) {
     return this.adminService.getUser(id);

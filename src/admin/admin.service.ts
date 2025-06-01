@@ -23,6 +23,20 @@ export class AdminService {
       throw new InternalServerErrorException('Failed to fetch users');
     }
   }
+    async getTeachers() {
+    try {
+      return await this.prisma.user.findMany({
+        where: {
+          role: "TEACHER"
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch users');
+    }
+  }
   async getUser(id: string) {
     try {
       return await this.prisma.user.findUnique({

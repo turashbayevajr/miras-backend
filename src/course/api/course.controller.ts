@@ -62,6 +62,21 @@ export class CourseController {
   async findAll() {
     return this.service.getAllCourses();
   }
+@Get('teacher')
+@ApiBearerAuth('access-token')
+@UseGuards(JwtAuthGuard)
+@ApiOperation({ summary: 'List all teacher-related courses' })
+@ApiResponse({ status: 200, description: 'Courses listed' })
+async findTeacherCourses(@Request() req) {
+  const userId = req.user.sub;
+  return this.service.getTeacherCourses(userId);
+}
+@Get('teacher/:id')
+@ApiOperation({ summary: 'List all teacher-related courses' })
+@ApiResponse({ status: 200, description: 'Courses listed' })
+async findTeacherCoursesById(@Param('id') id: string) {
+  return this.service.getTeacherCourses(id);
+}
   @Get('my-course/:id')
   @ApiOperation({ summary: 'List all courses the user is enrolled in' })
   @ApiResponse({ status: 200, description: 'Courses listed' })

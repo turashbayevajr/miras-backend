@@ -45,6 +45,19 @@ export class CourseService {
       );
     }
   }
+    async getTeacherCourses(userId: string): Promise<Course[]> {
+    try {
+      return this.courseRepository.findByCreatorOrEnrolled(userId);
+    } catch (error) {
+      this.logger.error(
+        messages.DATABASE_FETCH_ERROR(this.entityName),
+        error.stack,
+      );
+      throw new InternalServerErrorException(
+        messages.DATABASE_FETCH_ERROR(this.entityName),
+      );
+    }
+  }
   async getCoursesByPlan(plan: Plan): Promise<Course[]> {
     try {
       return this.courseRepository.findByPlan(plan);

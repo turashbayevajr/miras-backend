@@ -115,5 +115,71 @@ export class EnrollmentRepository {
     },
   });
 }
+async findPendingByTeacher(userId: string){
+  const courseIds = await this.prisma.course.findMany({
+    where: {
+      deletedAt: null,
+      OR: [
+        { creatorId: userId },
+        {
+          enrollments: {
+            some: {
+              userId,
+              deletedAt: null,
+            },
+          },
+        },
+      ],
+    },
+    select: { id: true },
+  });
+
+  const courseIdList = courseIds.map((c) => c.id);
+
+  return this.prisma.enrollment.findMany({
+    where: {
+      courseId: { in: courseIdList },
+      is_approved: false,
+      deletedAt: null,
+    },
+    include: {
+      user: true,
+      course: true,
+    },
+  });
+}
+async findAllEnrollmentsByTeacher(userId: string) {
+  const courseIds = await this.prisma.course.findMany({
+    where: {
+      deletedAt: null,
+      OR: [
+        { creatorId: userId },
+        {
+          enrollments: {
+            some: {
+              userId,
+              deletedAt: null,
+            },
+          },
+        },
+      ],
+    },
+    select: { id: true },
+  });
+
+  const courseIdList = courseIds.map((c) => c.id);
+
+  return this.prisma.enrollment.findMany({
+    where: {
+      courseId: { in: courseIdList },
+      deletedAt: null,
+    },
+    include: {
+      user: true,
+      course: true,
+    },
+  });
+}
+
 
 }

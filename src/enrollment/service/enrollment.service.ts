@@ -71,7 +71,32 @@ export class EnrollmentService {
       );
     }
   }
-
+  async getPendingTeacher(userId: string){
+    try {
+      return this.enrollmentRepository.findPendingByTeacher(userId);
+    } catch (error) {
+      this.logger.error(
+        messages.DATABASE_FETCH_ERROR(this.entityName),
+        error.stack,
+      );
+      throw new InternalServerErrorException(
+        messages.DATABASE_FETCH_ERROR(this.entityName),
+      );
+    }
+  }
+  async getAllEnrollmentsForTeacher(userId: string){
+    try {
+      return this.enrollmentRepository.findAllEnrollmentsByTeacher(userId);
+    } catch (error) {
+      this.logger.error(
+        messages.DATABASE_FETCH_ERROR(this.entityName),
+        error.stack,
+      );
+      throw new InternalServerErrorException(
+        messages.DATABASE_FETCH_ERROR(this.entityName),
+      );
+    }
+  }
   async getEnrollmentById(id: string): Promise<Enrollment> {
     try {
       const item = await this.enrollmentRepository.findById(id);
