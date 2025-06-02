@@ -111,7 +111,7 @@ export class SubmissionService {
     endDate?: string;
   }): Promise<Submission[]> {
     try {
-      await this.recalculateAllSubmissions();
+      // await this.recalculateAllSubmissions();
       return this.repo.findAll(filters);
     } catch (error) {
       this.logger.error(
@@ -294,7 +294,9 @@ export class SubmissionService {
         passed,
       };
 
-      return this.repo.update(id, updatedData);
+      const upd_submission = await this.repo.update(id, updatedData);
+      await this.recalculateAllSubmissions();
+      return upd_submission;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       this.logger.error(
@@ -336,4 +338,29 @@ export class SubmissionService {
       );
     }
   }
+async updateHomeworkScore(id: string, score_homework: number) {
+  try {
+    const existing = await this.getSubmissionById(id);
+
+const hasTestScore = existing.score_test !== null && existing.score_test !== undefined;
+
+const score = hasTestScore
+  ? Math.round(((existing.score_test as number) + score_homework) / 2)
+  : score_homework;
+
+    return await this.repo.updateHomeworkScore(id, score_homework, score);
+  } catch (error) {
+    if (error instanceof NotFoundException) throw error;
+
+    this.logger.error(
+      messages.DATABASE_UPDATE_ERROR(this.entityName, id),
+      error.stack,
+    );
+    throw new InternalServerErrorException(
+      messages.DATABASE_UPDATE_ERROR(this.entityName, id),
+    );
+  }
+}
+
+
 }

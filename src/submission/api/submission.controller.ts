@@ -80,6 +80,15 @@ export class SubmissionController {
   async update(@Param('id') id: string, @Body() dto: UpdateSubmissionDto) {
     return this.service.updateSubmission(id, dto);
   }
+@Put('score/:id')
+@ApiOperation({ summary: 'Update a submission homework score only' })
+@ApiResponse({ status: 200, description: 'Submission updated' })
+async updateScore(
+  @Param('id') id: string,
+  @Body() body: { score_homework: number },
+) {
+  return this.service.updateHomeworkScore(id, body.score_homework);
+}
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a submission' })

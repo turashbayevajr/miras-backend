@@ -182,6 +182,20 @@ export class SubmissionRepository {
       data,
     }) as unknown as Submission;
   }
+async updateHomeworkScore(
+  id: string,
+  score_homework: number,
+  score: number,
+) {
+  return this.prisma.submission.update({
+    where: { id },
+    data: {
+      score_homework,
+      score,
+    },
+  });
+}
+
 
   async delete(id: string): Promise<Submission> {
     return this.prisma.submission.delete({
