@@ -22,8 +22,8 @@ export class AuthService {
     return await bcrypt.hash(token, 10);
   }
 
-  async validateUser(email: string, password: string): Promise<User> {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+  async validateUser(phone: string, password: string): Promise<User> {
+    const user = await this.prisma.user.findUnique({ where: { phone } });
     if (!user) throw new UnauthorizedException(messages.INVALID_CREDENTIALS);
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -33,12 +33,11 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = await this.validateUser(dto.email, dto.password);
+    const user = await this.validateUser(dto.phone, dto.password);
     const payload = {
       sub: user.id,
-      email: user.email,
+      phone: user.phone,
       role: user.role,
-      plan: user.plan,
     };
 
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
@@ -56,36 +55,33 @@ export class AuthService {
       user: {
         id: user.id,
         fullName: user.fullName,
-        email: user.email,
+        phone: user.phone,
         role: user.role,
-        plan: user.plan,
       },
     };
   }
 
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({
-      where: { email: dto.email },
+      where: { phone: dto.phone },
     });
-    if (existing) throw new ConflictException(messages.ALREADY_EXIST('Email'));
+    if (existing) throw new ConflictException(messages.ALREADY_EXIST('phone'));
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const newUser = await this.prisma.user.create({
       data: {
         fullName: dto.fullName,
-        email: dto.email,
+        phone: dto.phone,
         password: hashedPassword,
         role: dto.role,
-        plan: 'STANDARD',
       },
     });
 
     const payload = {
       sub: newUser.id,
       fullName: newUser.fullName,
-      email: newUser.email,
+      phone: newUser.phone,
       role: newUser.role,
-      plan: newUser.plan,
     };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
@@ -102,9 +98,8 @@ export class AuthService {
       user: {
         id: newUser.id,
         fullName: newUser.fullName,
-        email: newUser.email,
+        phone: newUser.phone,
         role: newUser.role,
-        plan: newUser.plan,
       },
     };
   }
@@ -119,8 +114,7 @@ export class AuthService {
     const payload = {
       sub: user.id,
       fullName: user.fullName,
-      email: user.email,
-      plan: user.plan,
+      phone: user.phone,
       role: user.role,
     };
     const newAccess = this.jwtService.sign(payload, { expiresIn: '15m' });

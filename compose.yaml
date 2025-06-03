@@ -9,7 +9,7 @@ services:
       - 4000:4000
       - 5555:5555
     networks:
-      - course_network
+      - miras_network
     env_file: ".env"
     depends_on:
       db:
@@ -40,7 +40,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
-      - course_network
+      - miras_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 5s
@@ -56,5 +56,5 @@ volumes:
   db_data:
 
 networks:
-  course_network:
+  miras_network:
     driver: bridge

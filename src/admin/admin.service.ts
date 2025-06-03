@@ -23,11 +23,11 @@ export class AdminService {
       throw new InternalServerErrorException('Failed to fetch users');
     }
   }
-  async getTeachers() {
+  async getStaff() {
     try {
       return await this.prisma.user.findMany({
         where: {
-          role: 'TEACHER',
+          role: 'MANAGER',
         },
         orderBy: {
           createdAt: 'desc',
@@ -51,16 +51,13 @@ export class AdminService {
 
   async createUser(data: {
     fullName: string;
-    email: string;
+    phone: string;
     password: string;
     role: Role;
   }) {
     try {
       return await this.prisma.user.create({
-        data: {
-          ...data,
-          plan: 'STANDARD',
-        },
+        data
       });
     } catch (error) {
       throw new InternalServerErrorException('Failed to create user');
@@ -74,7 +71,7 @@ export class AdminService {
     id: string,
     data: Partial<{
       fullName: string;
-      email: string;
+      phone: string;
       password: string;
       role: Role;
     }>,

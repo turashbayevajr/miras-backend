@@ -9,7 +9,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
-import { Role, Plan } from '@prisma/client';
+import { Role } from '@prisma/client';
 
 @Controller('admin')
 export class AdminController {
@@ -19,9 +19,9 @@ export class AdminController {
   getUsers() {
     return this.adminService.getUsers();
   }
-  @Get('teachers')
-  getTeachers() {
-    return this.adminService.getTeachers();
+  @Get('staff')
+  getStaff() {
+    return this.adminService.getStaff();
   }
   @Get('user/:id')
   getUser(@Param('id') id: string) {
@@ -33,7 +33,7 @@ export class AdminController {
     @Body()
     body: {
       fullName: string;
-      email: string;
+      phone: string;
       password: string;
       role: Role;
     },
@@ -47,9 +47,8 @@ export class AdminController {
     @Body()
     body: Partial<{
       fullName: string;
-      email: string;
+      phone: string;
       password: string;
-      plan: Plan;
       role: Role;
     }>,
   ) {

@@ -7,6 +7,7 @@ export default {
   MUST_BE_AT_LEAST: (field: string, min: number) =>
     `${field} must be at least ${min}.`,
   MUST_BE_BOOLEAN: (field: string) => `${field} must be true or false.`,
+  INVALID_FORMAT: (field: string) => `Invalid format for ${field}.`,
 
   // Specific
   INVALID_EMAIL: 'Email address is not valid.',

@@ -1,24 +1,13 @@
 import {
-  IsEmail,
   IsEnum,
   IsNotEmpty,
+  IsPhoneNumber,
   IsString,
   MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import messages from '../../configs/messages';
-
-export enum Role {
-  ADMIN = 'ADMIN',
-  TEACHER = 'TEACHER',
-  STUDENT = 'STUDENT',
-}
-
-export enum Plan {
-  STANDARD = 'STANDARD',
-  PREMIUM = 'PREMIUM',
-  ENTERPRISE = 'ENTERPRISE',
-}
+import { Role } from '@prisma/client';
 
 export class RegisterDto {
   @ApiProperty({ example: 'John Doe' })
@@ -26,9 +15,9 @@ export class RegisterDto {
   @IsString({ message: messages.MUST_BE_STRING('Full name') })
   fullName: string;
 
-  @ApiProperty({ example: 'john@example.com' })
-  @IsEmail({}, { message: messages.INVALID_EMAIL })
-  email: string;
+  @ApiProperty({ example: '+77777777777' })
+  @IsPhoneNumber("KZ", { message: messages.INVALID_FORMAT("phone") })
+  phone: string;
 
   @ApiProperty({ example: 'StrongPassword123!' })
   @IsString({ message: messages.MUST_BE_STRING('Password') })
@@ -38,8 +27,4 @@ export class RegisterDto {
   @ApiProperty({ enum: Role })
   @IsEnum(Role, { message: messages.INVALID_ENUM('Role') })
   role: Role;
-
-  @ApiProperty({ enum: Plan })
-  @IsEnum(Plan, { message: messages.INVALID_ENUM('Plan') })
-  plan: Plan;
 }
