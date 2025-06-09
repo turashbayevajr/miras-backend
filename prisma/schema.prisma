@@ -1,5 +1,3 @@
-// schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,42 +13,87 @@ enum Role {
   CLIENT
 }
 
-model Product {
-  id          String    @id @default(uuid())
-  name        String
-  slug        String           @unique
-  description String?
-  age_group   String // e.g. "0-3 months", "3-6 months", "1-2 years"
-  categoryId  String
-  brand       String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  category    Category         @relation(fields: [categoryId], references: [id])
-  variants    ProductVariant[]
-  images      ProductImage[]
-}
-
-model ProductImage {
-  id        String    @id @default(uuid())
-  productId String
-  url       String
-  alt       String? // alt text for accessibility
-  position  Int // ordering (1 = first, etc.)
-  isPrimary Boolean @default(false)
-  product   Product @relation(fields: [productId], references: [id])
-}
-
 enum MainCategory {
   BOYS
   GIRLS
   BABIES
 }
 
-model Category {
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model AgeGroup {
   id       String    @id @default(uuid())
-  name     String
-  slug     String    @unique
+  label    String    @unique
   products Product[]
+}
+
+model Size {
+  id       String           @id @default(uuid())
+  label    String           @unique
+  variants ProductVariant[]
+}
+
+model Color {
+  id       String           @id @default(uuid())
+  label    String           @unique
+  hex      String?
+  variants ProductVariant[]
+}
+
+model Product {
+  id          String           @id @default(uuid())
+  name        String
+  slug        String           @unique
+  description String?
+  ageGroupId  String
+  categoryId  String
+  brand       String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+  category    Category         @relation(fields: [categoryId], references: [id])
+  ageGroup    AgeGroup         @relation(fields: [ageGroupId], references: [id])
+  variants    ProductVariant[]
+  images      ProductImage[]
+}
+
+model ProductImage {
+  id        String  @id @default(uuid())
+  productId String
+  url       String
+  alt       String?
+  position  Int
+  isPrimary Boolean @default(false)
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  slug      String    @unique
+  deletedAt DateTime?
+  products  Product[]
+}
+
+model ProductVariant {
+  id         String      @id @default(uuid())
+  productId  String
+  sizeId     String
+  colorId    String
+  price      Float
+  stock      Int
+  sku        String      @unique
+  deletedAt  DateTime?
+  product    Product     @relation(fields: [productId], references: [id])
+  size       Size        @relation(fields: [sizeId], references: [id])
+  color      Color       @relation(fields: [colorId], references: [id])
+  orderItems OrderItem[]
 }
 
 model User {
@@ -67,47 +110,28 @@ model User {
   region       String?
   role         Role      @default(CLIENT)
   isActive     Boolean   @default(true)
+  deletedAt    DateTime? // for soft delete
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   orders       Order[]
 }
 
-model ProductVariant {
-  id         String    @id @default(uuid())
-  productId  String
-  size       String // e.g., "56", "62", "S", "M"
-  color      String
-  price      Float
-  stock      Int // how many in stock
-  sku        String      @unique
-  product    Product     @relation(fields: [productId], references: [id])
-  orderItems OrderItem[]
-}
-
 model Order {
-  id        String    @id @default(uuid())
+  id        String      @id @default(uuid())
   userId    String
   status    OrderStatus @default(PENDING)
   total     Float
   createdAt DateTime    @default(now())
-  User      User        @relation(fields: [userId], references: [id])
+  user      User        @relation(fields: [userId], references: [id])
   items     OrderItem[]
 }
 
 model OrderItem {
-  id               String    @id @default(uuid())
+  id               String         @id @default(uuid())
   orderId          String
   productVariantId String
   quantity         Int
   unitPrice        Float
   order            Order          @relation(fields: [orderId], references: [id])
   productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
-}
-
-enum OrderStatus {
-  PENDING
-  CONFIRMED
-  SHIPPED
-  DELIVERED
-  CANCELLED
 }

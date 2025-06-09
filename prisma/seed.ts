@@ -1,34 +1,33 @@
-import { PrismaClient, Role, Plan } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = 'admin@gmail.com';
+  const phone = '+77777777777';
 
   // check if user already exists
-  const existing = await prisma.user.findUnique({ where: { email } });
+  const existing = await prisma.user.findUnique({ where: { phone } });
   if (existing) {
-    console.log(`✅ Admin already exists: ${email}`);
+    console.log(`✅ Admin already exists: ${phone}`);
     return;
   }
 
-  const hashedPassword = await bcrypt.hash('3EnTeR#@23price', 10);
+  const hashedPassword = await bcrypt.hash('batmenloh', 10);
 
   const user =await prisma.user.upsert({
-  where: { email },
+  where: { phone },
   update: {}, // ничего не меняем, если уже есть
   create: {
     fullName: 'Admin User',
-    email,
+    phone,
     password: hashedPassword,
     role: Role.ADMIN,
-    plan: Plan.ENTERPRISE,
   },
 });
 
 
-  console.log('✅ Admin user created:', user.email);
+  console.log('✅ Admin user created:', user.phone);
 }
 
 main()

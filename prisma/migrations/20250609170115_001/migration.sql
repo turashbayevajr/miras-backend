@@ -8,16 +8,42 @@ CREATE TYPE "MainCategory" AS ENUM ('BOYS', 'GIRLS', 'BABIES');
 CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED');
 
 -- CreateTable
+CREATE TABLE "AgeGroup" (
+    "id" TEXT NOT NULL,
+    "label" TEXT NOT NULL,
+
+    CONSTRAINT "AgeGroup_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Size" (
+    "id" TEXT NOT NULL,
+    "label" TEXT NOT NULL,
+
+    CONSTRAINT "Size_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Color" (
+    "id" TEXT NOT NULL,
+    "label" TEXT NOT NULL,
+    "hex" TEXT,
+
+    CONSTRAINT "Color_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Product" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "description" TEXT,
-    "age_group" TEXT NOT NULL,
+    "ageGroupId" TEXT NOT NULL,
     "categoryId" TEXT NOT NULL,
     "brand" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "Product_pkey" PRIMARY KEY ("id")
 );
@@ -39,8 +65,23 @@ CREATE TABLE "Category" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
+    "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ProductVariant" (
+    "id" TEXT NOT NULL,
+    "productId" TEXT NOT NULL,
+    "sizeId" TEXT NOT NULL,
+    "colorId" TEXT NOT NULL,
+    "price" DOUBLE PRECISION NOT NULL,
+    "stock" INTEGER NOT NULL,
+    "sku" TEXT NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "ProductVariant_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -58,23 +99,11 @@ CREATE TABLE "User" (
     "region" TEXT,
     "role" "Role" NOT NULL DEFAULT 'CLIENT',
     "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "deletedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "ProductVariant" (
-    "id" TEXT NOT NULL,
-    "productId" TEXT NOT NULL,
-    "size" TEXT NOT NULL,
-    "color" TEXT NOT NULL,
-    "price" DOUBLE PRECISION NOT NULL,
-    "stock" INTEGER NOT NULL,
-    "sku" TEXT NOT NULL,
-
-    CONSTRAINT "ProductVariant_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -100,10 +129,22 @@ CREATE TABLE "OrderItem" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "AgeGroup_label_key" ON "AgeGroup"("label");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Size_label_key" ON "Size"("label");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Color_label_key" ON "Color"("label");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Product_slug_key" ON "Product"("slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Category_slug_key" ON "Category"("slug");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ProductVariant_sku_key" ON "ProductVariant"("sku");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_phone_key" ON "User"("phone");
@@ -111,17 +152,23 @@ CREATE UNIQUE INDEX "User_phone_key" ON "User"("phone");
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
--- CreateIndex
-CREATE UNIQUE INDEX "ProductVariant_sku_key" ON "ProductVariant"("sku");
-
 -- AddForeignKey
 ALTER TABLE "Product" ADD CONSTRAINT "Product_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Product" ADD CONSTRAINT "Product_ageGroupId_fkey" FOREIGN KEY ("ageGroupId") REFERENCES "AgeGroup"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ProductImage" ADD CONSTRAINT "ProductImage_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ProductVariant" ADD CONSTRAINT "ProductVariant_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ProductVariant" ADD CONSTRAINT "ProductVariant_sizeId_fkey" FOREIGN KEY ("sizeId") REFERENCES "Size"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ProductVariant" ADD CONSTRAINT "ProductVariant_colorId_fkey" FOREIGN KEY ("colorId") REFERENCES "Color"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Order" ADD CONSTRAINT "Order_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -1,4 +1,4 @@
-import { IsEmail, IsPhoneNumber, IsString } from 'class-validator';
+import { IsPhoneNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import messages from '../../configs/messages';
 

@@ -56,4 +56,8 @@ export default {
     field: string,
     value: string,
   ) => `Failed to fetch ${entity} by ${field}: ${value}`,
+    ALREADY_USED: (field: string) => `${capitalize(field.trim())} already used in database.`,
 };
+function capitalize(word: string): string {
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
