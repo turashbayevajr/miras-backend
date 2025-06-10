@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 async function main() {
   const phone = '+77777777777';
 
-  // check if user already exists
   const existing = await prisma.user.findUnique({ where: { phone } });
   if (existing) {
     console.log(`✅ Admin already exists: ${phone}`);
@@ -17,7 +16,7 @@ async function main() {
 
   const user =await prisma.user.upsert({
   where: { phone },
-  update: {}, // ничего не меняем, если уже есть
+  update: {},
   create: {
     fullName: 'Admin User',
     phone,
