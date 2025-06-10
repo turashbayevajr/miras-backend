@@ -14,7 +14,7 @@ export class AgeGroupRepository {
 
   async findAll(): Promise<AgeGroup[]> {
     return this.prisma.ageGroup.findMany({
-      orderBy: { label: 'asc' },
+      orderBy: { label_kk: 'asc' },
     }) as unknown as AgeGroup[];
   }
 

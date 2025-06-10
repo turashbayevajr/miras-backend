@@ -27,24 +27,41 @@ enum OrderStatus {
   CANCELLED
 }
 
+model Category {
+  id        String    @id @default(uuid())
+  label_en  String
+  label_ru  String
+  label_kk  String
+  slug      String    @unique
+  deletedAt DateTime?
+  products  Product[]
+}
+
 model AgeGroup {
-  id       String    @id @default(uuid())
-  label    String    @unique
-  products Product[]
+  id        String   @id @default(uuid())
+  label_en  String
+  label_ru  String
+  label_kk  String
+  products  Product[]
 }
 
 model Size {
-  id       String           @id @default(uuid())
-  label    String           @unique
-  variants ProductVariant[]
+  id        String           @id @default(uuid())
+  label_en  String
+  label_ru  String
+  label_kk  String
+  variants  ProductVariant[]
 }
 
 model Color {
-  id       String           @id @default(uuid())
-  label    String           @unique
-  hex      String?
-  variants ProductVariant[]
+  id        String           @id @default(uuid())
+  label_en  String
+  label_ru  String
+  label_kk  String
+  hex       String?
+  variants  ProductVariant[]
 }
+
 
 model Product {
   id          String           @id @default(uuid())
@@ -71,14 +88,6 @@ model ProductImage {
   position  Int
   isPrimary Boolean @default(false)
   product   Product @relation(fields: [productId], references: [id])
-}
-
-model Category {
-  id        String    @id @default(uuid())
-  name      String
-  slug      String    @unique
-  deletedAt DateTime?
-  products  Product[]
 }
 
 model ProductVariant {

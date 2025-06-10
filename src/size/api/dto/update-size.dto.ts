@@ -1,8 +1,15 @@
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateSizeDto {
-  @IsOptional()
   @IsString()
-  @MaxLength(100)
-  label?: string;
+  @IsOptional()
+  label_en?: string;
+
+  @IsString()
+  @IsOptional()
+  label_ru?: string;
+
+  @IsString()
+  @IsOptional()
+  label_kk?: string;
 }

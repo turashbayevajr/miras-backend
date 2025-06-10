@@ -1,13 +1,19 @@
-import { IsString, IsOptional, MaxLength } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateCategoryDto {
   @IsString()
   @IsOptional()
-  @MaxLength(255)
-  name?: string;
+  label_en?: string;
 
   @IsString()
   @IsOptional()
-  @MaxLength(255)
+  label_ru?: string;
+
+  @IsString()
+  @IsOptional()
+  label_kk?: string;
+
+  @IsString()
+  @IsOptional()
   slug?: string;
 }

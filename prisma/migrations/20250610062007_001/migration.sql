@@ -8,9 +8,23 @@ CREATE TYPE "MainCategory" AS ENUM ('BOYS', 'GIRLS', 'BABIES');
 CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED');
 
 -- CreateTable
+CREATE TABLE "Category" (
+    "id" TEXT NOT NULL,
+    "label_en" TEXT NOT NULL,
+    "label_ru" TEXT NOT NULL,
+    "label_kk" TEXT NOT NULL,
+    "slug" TEXT NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "AgeGroup" (
     "id" TEXT NOT NULL,
-    "label" TEXT NOT NULL,
+    "label_en" TEXT NOT NULL,
+    "label_ru" TEXT NOT NULL,
+    "label_kk" TEXT NOT NULL,
 
     CONSTRAINT "AgeGroup_pkey" PRIMARY KEY ("id")
 );
@@ -18,7 +32,9 @@ CREATE TABLE "AgeGroup" (
 -- CreateTable
 CREATE TABLE "Size" (
     "id" TEXT NOT NULL,
-    "label" TEXT NOT NULL,
+    "label_en" TEXT NOT NULL,
+    "label_ru" TEXT NOT NULL,
+    "label_kk" TEXT NOT NULL,
 
     CONSTRAINT "Size_pkey" PRIMARY KEY ("id")
 );
@@ -26,7 +42,9 @@ CREATE TABLE "Size" (
 -- CreateTable
 CREATE TABLE "Color" (
     "id" TEXT NOT NULL,
-    "label" TEXT NOT NULL,
+    "label_en" TEXT NOT NULL,
+    "label_ru" TEXT NOT NULL,
+    "label_kk" TEXT NOT NULL,
     "hex" TEXT,
 
     CONSTRAINT "Color_pkey" PRIMARY KEY ("id")
@@ -58,16 +76,6 @@ CREATE TABLE "ProductImage" (
     "isPrimary" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "ProductImage_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Category" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "slug" TEXT NOT NULL,
-    "deletedAt" TIMESTAMP(3),
-
-    CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -129,19 +137,10 @@ CREATE TABLE "OrderItem" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "AgeGroup_label_key" ON "AgeGroup"("label");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Size_label_key" ON "Size"("label");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Color_label_key" ON "Color"("label");
+CREATE UNIQUE INDEX "Category_slug_key" ON "Category"("slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Product_slug_key" ON "Product"("slug");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Category_slug_key" ON "Category"("slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ProductVariant_sku_key" ON "ProductVariant"("sku");

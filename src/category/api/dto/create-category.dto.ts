@@ -1,17 +1,19 @@
-import { IsString, IsNotEmpty, IsOptional, MaxLength, IsUUID } from 'class-validator';
-import messages from 'src/configs/messages';
-import { Unique } from 'src/validators/unique.validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateCategoryDto {
   @IsString()
   @IsNotEmpty()
-  @MaxLength(255)
-  @Unique("category", "name", { message: messages.ALREADY_USED("Name") })
-  name: string;
+  label_en: string;
 
   @IsString()
   @IsNotEmpty()
-  @MaxLength(255)
-  @Unique("category", "slug", { message: messages.ALREADY_USED("Slug") })
+  label_ru: string;
+
+  @IsString()
+  @IsNotEmpty()
+  label_kk: string;
+
+  @IsString()
+  @IsNotEmpty()
   slug: string;
 }

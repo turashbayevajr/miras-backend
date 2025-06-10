@@ -16,7 +16,7 @@ async findAll(): Promise<ProductVariant[]> {
     where: { deletedAt: null },
     orderBy: {
       size: {
-        label: 'asc',
+        label_kk: 'asc',
       },
     },
     include: {
@@ -34,7 +34,7 @@ async findByProductId(productId: string): Promise<ProductVariant[]> {
     },
     orderBy: {
       size: {
-        label: 'asc',
+        label_kk: 'asc',
       },
     },
     include: {

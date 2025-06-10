@@ -1,6 +1,8 @@
 export class Category {
   id: string;
-  name: string;
+  label_en: string;
+  label_ru: string;
+  label_kk: string;
   slug: string;
-  deletedAt?: Date;
+  deletedAt: Date | null;
 }

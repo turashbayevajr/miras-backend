@@ -14,7 +14,7 @@ export class ColorRepository {
 
   async findAll(): Promise<Color[]> {
     return this.prisma.color.findMany({
-      orderBy: { label: 'asc' },
+      orderBy: { label_kk: 'asc' },
     }) as unknown as Color[];
   }
 

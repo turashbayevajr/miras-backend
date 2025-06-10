@@ -1,13 +1,19 @@
-import { IsNotEmpty, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
+import { IsHexColor, IsOptional, IsString, IsNotEmpty } from 'class-validator';
 
 export class CreateColorDto {
   @IsString()
   @IsNotEmpty()
-  @MaxLength(100)
-  label: string;
+  label_en: string;
 
-  @IsOptional()
   @IsString()
-  @Matches(/^#([0-9a-fA-F]{3}){1,2}$/, { message: 'Hex must be a valid color code' })
+  @IsNotEmpty()
+  label_ru: string;
+
+  @IsString()
+  @IsNotEmpty()
+  label_kk: string;
+
+  @IsHexColor()
+  @IsOptional()
   hex?: string;
 }

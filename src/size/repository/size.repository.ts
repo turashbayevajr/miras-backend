@@ -14,7 +14,7 @@ export class SizeRepository {
 
   async findAll(): Promise<Size[]> {
     return this.prisma.size.findMany({
-      orderBy: { label: 'asc' },
+      orderBy: { label_en: 'asc' },
     }) as unknown as Size[];
   }
 

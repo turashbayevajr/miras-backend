@@ -1,8 +1,15 @@
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateSizeDto {
   @IsString()
   @IsNotEmpty()
-  @MaxLength(100)
-  label: string;
+  label_en: string;
+
+  @IsString()
+  @IsNotEmpty()
+  label_ru: string;
+
+  @IsString()
+  @IsNotEmpty()
+  label_kk: string;
 }
